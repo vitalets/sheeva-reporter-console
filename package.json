@@ -1,0 +1,17 @@
+{
+  "name": "sheeva-reporter-progress",
+  "version": "0.1.0",
+  "description": "Progress reporter for Sheeva test runner",
+  "author": {
+    "name": "Vitaliy Potapov",
+    "email": "noginsk@rambler.ru"
+  },
+  "scripts": {
+  },
+  "license": "MIT",
+  "dependencies": {
+    "cli-color": "^1.1.0"
+  },
+  "devDependencies": {
+  }
+}

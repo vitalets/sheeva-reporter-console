@@ -11,20 +11,20 @@ module.exports = class ProgressReporter {
     this._printer = new Printer();
     this._startTime = null;
   }
-  onEvent(event, data) {
+  handleEvent(event, data) {
     // console.log('console-reporter:', event, data.error)
     if (data.error) {
       this._errors.push(data);
     }
     switch (event) {
-      case 'START': {
+      case 'RUNNER_START': {
         const {files, config, envs} = data;
         this._initEnvStat(envs);
         this._startTime = data.timestamp;
         this._printer.printHeader({files, envs, concurrency: config.concurrency});
         break;
       }
-      case 'END': {
+      case 'RUNNER_END': {
         this._printer.printFooter({errors: this._errors, startTime: this._startTime});
         break;
       }

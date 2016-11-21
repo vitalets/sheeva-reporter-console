@@ -11,10 +11,10 @@ module.exports = class Printer {
     this._cursor = null;
   }
 
-  printHeader({files, envs, concurrency}) {
+  printHeader({files, envs, config}) {
     console.log(`Sheeva started.`);
     console.log(`Processed ${num(files.length)} file(s).`);
-    console.log(`Running on ${num(envs.length)} env(s) with concurrency = ${num(concurrency)}.`);
+    console.log(`Running on ${num(envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
     this._cursor = new StickyCursor();
   }
 
@@ -37,7 +37,7 @@ module.exports = class Printer {
     this._cursor.write(row, line);
   }
 
-  printFooter({errors, startTime}) {
+  printFooter({errors, duration}) {
     errors.forEach(data => {
       if (data.error.name === 'AssertionError') {
         console.log(formatAssertionError(data))
@@ -48,7 +48,7 @@ module.exports = class Printer {
       }
     });
     console.log(`Errors: ${errors.length}`);
-    console.log(`Time: ${clc.cyan(Date.now() - startTime)} ms`);
+    console.log(`Time: ${clc.cyan(duration)} ms`);
     console.log(`Done.`);
   }
 };

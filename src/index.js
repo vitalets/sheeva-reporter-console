@@ -2,16 +2,13 @@
  * Reporter that just put events into log
  */
 
-const clc = require('cli-color');
-const path = require('path');
-const StickyCursor = require('./sticky-cursor');
+const Printer = require('./printer');
 
 module.exports = class ProgressReporter {
   constructor() {
     this._envStat = new Map();
-    this._cursor = null;
     this._errors = [];
-    // temp:
+    this._printer = new Printer();
     this._startTime = null;
   }
   onEvent(event, data) {
@@ -22,25 +19,21 @@ module.exports = class ProgressReporter {
     switch (event) {
       case 'START': {
         const {files, config, envs} = data;
-        console.log(`Sheeva started.`);
-        console.log(`Processed ${num(files.length)} file(s).`);
-        console.log(`Running on ${num(envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
-        this._cursor = new StickyCursor();
         this._initEnvStat(envs);
         this._startTime = data.timestamp;
+        this._printer.printHeader({files, envs, concurrency: config.concurrency});
         break;
       }
       case 'END': {
-        printErrors(this._errors);
-        console.log(`Time: ${clc.cyan(Date.now() - this._startTime)} ms`);
-        console.log(`Done.`);
+        this._printer.printFooter({errors: this._errors, startTime: this._startTime});
         break;
       }
       case 'ENV_START': {
         const stat = this._getStat(data.env);
         stat.label = data.label;
         stat.tests.total = data.testsCount;
-        this._printEnvTestsStat(data.env, stat);
+        const row = this._getRow(data.env);
+        this._printer.printTestsLine(row, stat);
         break;
       }
       case 'ENV_END': {
@@ -56,7 +49,8 @@ module.exports = class ProgressReporter {
           done: false,
         };
         stat.sessions.set(data.session, sessionStat);
-        this._printEnvSessionStat(data.env, sessionStat);
+        const row = this._getRow(data.env) + sessionStat.index + 1;
+        this._printer.printSessionLine(row, sessionStat);
         break;
       }
       case 'SESSION_END': {
@@ -65,7 +59,8 @@ module.exports = class ProgressReporter {
         sessionStat.currentFile = '';
         sessionStat.done = true;
         stat.sessions.set(data.session, sessionStat);
-        this._printEnvSessionStat(data.env, sessionStat);
+        const row = this._getRow(data.env) + sessionStat.index + 1;
+        this._printer.printSessionLine(row, sessionStat);
         break;
       }
       case 'SUITE_START': {
@@ -74,7 +69,8 @@ module.exports = class ProgressReporter {
           const sessionStat = stat.sessions.get(data.session);
           sessionStat.currentFile = data.suite.name;
           stat.sessions.set(data.session, sessionStat);
-          this._printEnvSessionStat(data.env, sessionStat);
+          const row = this._getRow(data.env) + sessionStat.index + 1;
+          this._printer.printSessionLine(row, sessionStat);
         }
         break;
       }
@@ -84,7 +80,8 @@ module.exports = class ProgressReporter {
           const sessionStat = stat.sessions.get(data.session);
           sessionStat.doneFiles++;
           stat.sessions.set(data.session, sessionStat);
-          this._printEnvSessionStat(data.env, sessionStat);
+          const row = this._getRow(data.env) + sessionStat.index + 1;
+          this._printer.printSessionLine(row, sessionStat);
         }
         break;
       }
@@ -92,11 +89,12 @@ module.exports = class ProgressReporter {
         const stat = this._getStat(data.env);
         stat.tests.ended++;
         if (data.error) {
-          stat.tests.errors++;
+          stat.tests.failed++;
         } else {
           stat.tests.success++;
         }
-        this._printEnvTestsStat(data.env, stat);
+        const row = this._getRow(data.env);
+        this._printer.printTestsLine(row, stat);
         return;
       }
     }
@@ -111,7 +109,7 @@ module.exports = class ProgressReporter {
           running: 0,
           ended: 0,
           success: 0,
-          errors: 0,
+          failed: 0,
         },
         errors: [],
         sessions: new Map()
@@ -120,25 +118,6 @@ module.exports = class ProgressReporter {
   }
   _getStat(env) {
     return this._envStat.get(env);
-  }
-  _printEnvTestsStat(env, {label, tests}) {
-    let line = `${clc.bold(label)}: executed ${num(tests.ended)} of ${num(tests.total)} test(s) `;
-    line += tests.errors
-      ? clc.red(`${tests.errors} ERROR(S)`)
-      : (tests.success  ? clc.green(`SUCCESS`) : '');
-    const row = this._getRow(env);
-    this._cursor.write(row, line);
-  }
-  _printEnvSessionStat(env, {index, currentFile, done, doneFiles}) {
-    let line = clc.magenta(`Session #${index + 1}: `);
-    if (currentFile) {
-      const filename = path.basename(currentFile);
-      line += `${filename}`;
-    } else {
-      line += done ? `done ${doneFiles} file(s)` : `starting...`;
-    }
-    const row = this._getRow(env) + index + 1;
-    this._cursor.write(row, line);
   }
   _getRow(env) {
     let row = 0;
@@ -152,52 +131,3 @@ module.exports = class ProgressReporter {
     return row;
   }
 };
-
-// function processError(data) {
-//   const error = data && data.error;
-//   if (error) {
-//     console.log(error.name === 'UnexpectedError' ? error.message : error);
-//   }
-// }
-
-function formatTestError(data) {
-  return []
-    .concat(data.test.parents.map(suite => suite.name))
-    .concat([data.test.name])
-    .map((item, i) => ' '.repeat(i * 2) + item)
-    .concat([data.error.message])
-    .join('\n');
-}
-
-function printErrors(errors) {
-  console.log(`ERRORS: ${errors.length}`);
-  errors.forEach(data => console.log(data.test ? formatTestError(data) : data.error))
-}
-
-function num(str) {
-  return clc.blue.bold(str);
-}
-
-/*
- Karma output:
-
- 13 11 2016 17:10:14.489:INFO [Chrome 54.0.2840 (Mac OS X 10.11.6)]: Connected on socket /#jqOXBVZ6-kqrz-FVAAAB with id 33112103
- Chrome 56.0.2918 (Mac OS X 10.11.6) exists should return true for existing file FAILED
- AssertionError: expected false to be truthy
- at doAsserterAsyncAndAddThen (node_modules/chai-as-promised/lib/chai-as-promised.js:296:33)
- at Assertion.<anonymous> (node_modules/chai-as-promised/lib/chai-as-promised.js:286:25)
- at Assertion.get (node_modules/chai/chai.js:5396:37)
- at Function.assert.isOk (node_modules/chai/chai.js:2236:31)
- at node_modules/chai-as-promised/lib/chai-as-promised.js:362:57
- Chrome 54.0.2840 (Mac OS X 10.11.6) exists should return true for existing file FAILED
- AssertionError: expected false to be truthy
- at doAsserterAsyncAndAddThen (node_modules/chai-as-promised/lib/chai-as-promised.js:296:33)
- at Assertion.<anonymous> (node_modules/chai-as-promised/lib/chai-as-promised.js:286:25)
- at Assertion.get (node_modules/chai/chai.js:5396:37)
- at Function.assert.isOk (node_modules/chai/chai.js:2236:31)
- at node_modules/chai-as-promised/lib/chai-as-promised.js:362:57
- Chrome 56.0.2918 (Mac OS X 10.11.6): Executed 56 of 56 (1 FAILED) (1.42 secs / 0.831 secs)
- Chrome 54.0.2840 (Mac OS X 10.11.6): Executed 56 of 56 (1 FAILED) (1.578 secs / 0.946 secs)
- TOTAL: 2 FAILED, 110 SUCCESS
-
- */

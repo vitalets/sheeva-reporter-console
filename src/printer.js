@@ -38,7 +38,15 @@ module.exports = class Printer {
   }
 
   printFooter({errors, startTime}) {
-    errors.forEach(data => console.log(isAssertionError(data) ? formatAssertionError(data) : data.error));
+    errors.forEach(data => {
+      if (data.error.name === 'AssertionError') {
+        console.log(formatAssertionError(data))
+      } else if (data.error.name === 'UnexpectedError') {
+        console.log(data.error.originalError || formatAssertionError(data));
+      } else {
+        console.log(data.error)
+      }
+    });
     console.log(`Errors: ${errors.length}`);
     console.log(`Time: ${clc.cyan(Date.now() - startTime)} ms`);
     console.log(`Done.`);
@@ -50,7 +58,11 @@ function num(str) {
 }
 
 function isAssertionError(data) {
-  return data.test && (data.error.name === 'AssertionError' || data.error.name === 'UnexpectedError');
+  return data.test && data.error.name === 'AssertionError';
+}
+
+function isUnexpectedError(data) {
+  return data.test && data.error.name === 'UnexpectedError';
 }
 
 function formatAssertionError(data) {

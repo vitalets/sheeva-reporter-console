@@ -42,7 +42,8 @@ module.exports = class Printer {
       if (data.error.name === 'AssertionError') {
         console.log(formatAssertionError(data))
       } else if (data.error.name === 'UnexpectedError') {
-        console.log(data.error.originalError || formatAssertionError(data));
+//        console.log(data.error.originalError || formatAssertionError(data));
+        console.log(formatAssertionError(data));
       } else {
         console.log(data.error)
       }
@@ -55,14 +56,6 @@ module.exports = class Printer {
 
 function num(str) {
   return clc.blue.bold(str);
-}
-
-function isAssertionError(data) {
-  return data.test && data.error.name === 'AssertionError';
-}
-
-function isUnexpectedError(data) {
-  return data.test && data.error.name === 'UnexpectedError';
 }
 
 function formatAssertionError(data) {

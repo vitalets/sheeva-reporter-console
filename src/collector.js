@@ -46,7 +46,8 @@ module.exports = class Collector {
       index: envStat.sessions.size,
       row: envStat.row + envStat.sessions.size + 1,
       currentFile: '',
-      doneFiles: 0,
+      files: 0,
+      tests: 0,
       started: data.timestamp,
       duration: null,
     };
@@ -66,7 +67,7 @@ module.exports = class Collector {
   }
   rootSuiteEnd(data) {
     const sessionStat = this._getSessionStat(data);
-    sessionStat.doneFiles++;
+    sessionStat.files++;
     return sessionStat;
   }
   hookEnd(data) {
@@ -77,7 +78,9 @@ module.exports = class Collector {
   }
   testEnd(data) {
     const envStat = this._getEnvStat(data);
+    const sessionStat = this._getSessionStat(data);
     envStat.tests.ended++;
+    sessionStat.tests++;
     if (data.error) {
       envStat.tests.failed++;
       envStat.errors.push(data);

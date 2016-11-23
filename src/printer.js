@@ -59,7 +59,7 @@ module.exports = class Printer {
       }
     });
     console.log(`Errors: ${errors.length}`);
-    console.log(`Time: ${clc.cyan(duration)} ms`);
+    console.log(`Total time: ${clc.cyan(duration)} ms`);
     console.log(`Done.`);
   }
 
@@ -67,7 +67,7 @@ module.exports = class Printer {
     const label = clc.magenta(`Session #${sessionStat.index + 1}: `);
     const bar = clc.green('▇'.repeat(sessionStat.normalDuration));
     const spacer = ' '.repeat(maxWidth - sessionStat.normalDuration + 1);
-    const footer = `${sessionStat.doneFiles} file(s), ${clc.cyan(sessionStat.duration)} ms`;
+    const footer = `${clc.cyan(sessionStat.duration)} ms, ${sessionStat.tests} test(s), ${sessionStat.files} file(s)`;
     const line = label + bar + spacer + footer;
     this._cursor.write(sessionStat.row, line);
   }

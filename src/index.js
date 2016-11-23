@@ -19,12 +19,13 @@ module.exports = class ProgressReporter {
       }
       case 'RUNNER_END': {
         const info = this._collector.runnerEnd();
+        this._printer.printSessionBars(this._collector.envStats);
         this._printer.printFooter(info);
         break;
       }
       case 'ENV_START': {
-        const {row, stat} = this._collector.envStart(data);
-        this._printer.printTestsLine(row, stat);
+        const stat = this._collector.envStart(data);
+        this._printer.printTestsLine(stat);
         break;
       }
       case 'ENV_END': {
@@ -32,26 +33,26 @@ module.exports = class ProgressReporter {
         break;
       }
       case 'SESSION_START': {
-        const {row, sessionStat} = this._collector.sessionStart(data);
-        this._printer.printSessionLine(row, sessionStat);
+        const stat = this._collector.sessionStart(data);
+        this._printer.printSessionLine(stat);
         break;
       }
       case 'SESSION_END': {
-        const {row, sessionStat} = this._collector.sessionEnd(data);
-        this._printer.printSessionLine(row, sessionStat);
+        const stat = this._collector.sessionEnd(data);
+        this._printer.printSessionLine(stat);
         break;
       }
       case 'SUITE_START': {
         if (!data.suite.parent) {
-          const {row, sessionStat} = this._collector.rootSuiteStart(data);
-          this._printer.printSessionLine(row, sessionStat);
+          const stat = this._collector.rootSuiteStart(data);
+          this._printer.printSessionLine(stat);
         }
         break;
       }
       case 'SUITE_END': {
         if (!data.suite.parent) {
-          const {row, sessionStat} = this._collector.rootSuiteEnd(data);
-          this._printer.printSessionLine(row, sessionStat);
+          const stat = this._collector.rootSuiteEnd(data);
+          this._printer.printSessionLine(stat);
         }
         break;
       }
@@ -60,8 +61,8 @@ module.exports = class ProgressReporter {
         break;
       }
       case 'TEST_END': {
-        const {row, stat} = this._collector.testEnd(data);
-        this._printer.printTestsLine(row, stat);
+        const stat = this._collector.testEnd(data);
+        this._printer.printTestsLine(stat);
         break;
       }
     }

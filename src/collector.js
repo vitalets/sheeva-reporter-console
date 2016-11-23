@@ -4,13 +4,16 @@
 
 module.exports = class Collector {
   constructor() {
-    this._envStat = new Map();
+    this._envStats = new Map();
     this._startTime = Date.now();
   }
+  get envStats() {
+    return this._envStats;
+  }
   runnerStart(data) {
-    data.envs.forEach((env, index) => {
-      this._envStat.set(env, {
-        index,
+    data.envs.forEach(env => {
+      this._envStats.set(env, {
+        row: null,
         label: '',
         tests: {
           total: 0,
@@ -20,7 +23,7 @@ module.exports = class Collector {
           failed: 0,
         },
         errors: [],
-        sessions: new Map()
+        sessions: new Map(),
       });
     });
   }
@@ -31,84 +34,79 @@ module.exports = class Collector {
     };
   }
   envStart(data) {
-    const stat = this._getStat(data.env);
-    stat.label = data.label;
-    stat.tests.total = data.testsCount;
-    const row = this._getRow(data.env);
-    return {row, stat};
+    const envStat = this._getEnvStat(data);
+    envStat.label = data.label;
+    envStat.tests.total = data.testsCount;
+    envStat.row = this._getRow(data.env);
+    return envStat;
   }
   sessionStart(data) {
-    const stat = this._getStat(data.env);
+    const envStat = this._getEnvStat(data);
     const sessionStat = {
-      index: stat.sessions.size,
+      index: envStat.sessions.size,
+      row: envStat.row + envStat.sessions.size + 1,
       currentFile: '',
       doneFiles: 0,
-      done: false,
+      started: data.timestamp,
+      duration: null,
     };
-    stat.sessions.set(data.session, sessionStat);
-    const row = this._getRow(data.env) + sessionStat.index + 1;
-    return {row, sessionStat};
+    envStat.sessions.set(data.session, sessionStat);
+    return sessionStat;
   }
   sessionEnd(data) {
-    const stat = this._getStat(data.env);
-    const sessionStat = stat.sessions.get(data.session);
+    const sessionStat = this._getSessionStat(data);
     sessionStat.currentFile = '';
-    sessionStat.done = true;
-    stat.sessions.set(data.session, sessionStat);
-    const row = this._getRow(data.env) + sessionStat.index + 1;
-    return {row, sessionStat};
+    sessionStat.duration = data.timestamp - sessionStat.started;
+    return sessionStat;
   }
   rootSuiteStart(data) {
-    const stat = this._getStat(data.env);
-    const sessionStat = stat.sessions.get(data.session);
+    const sessionStat = this._getSessionStat(data);
     sessionStat.currentFile = data.suite.name;
-    stat.sessions.set(data.session, sessionStat);
-    const row = this._getRow(data.env) + sessionStat.index + 1;
-    return {row, sessionStat};
+    return sessionStat;
   }
   rootSuiteEnd(data) {
-    const stat = this._getStat(data.env);
-    const sessionStat = stat.sessions.get(data.session);
+    const sessionStat = this._getSessionStat(data);
     sessionStat.doneFiles++;
-    stat.sessions.set(data.session, sessionStat);
-    const row = this._getRow(data.env) + sessionStat.index + 1;
-    return {row, sessionStat};
+    return sessionStat;
   }
   hookEnd(data) {
-    const stat = this._getStat(data.env);
     if (data.error) {
-      stat.errors.push(data);
+      const envStat = this._getEnvStat(data);
+      envStat.errors.push(data);
     }
   }
   testEnd(data) {
-    const stat = this._getStat(data.env);
-    stat.tests.ended++;
+    const envStat = this._getEnvStat(data);
+    envStat.tests.ended++;
     if (data.error) {
-      stat.tests.failed++;
-      stat.errors.push(data);
+      envStat.tests.failed++;
+      envStat.errors.push(data);
     } else {
-      stat.tests.success++;
+      envStat.tests.success++;
     }
-    const row = this._getRow(data.env);
-    return {row, stat};
+    return envStat;
   }
-  _getStat(env) {
-    return this._envStat.get(env);
+  _getEnvStat(data) {
+    return this._envStats.get(data.env);
+  }
+  _getSessionStat(data) {
+    const envStat = this._getEnvStat(data);
+    return envStat.sessions.get(data.session);
   }
   _getRow(env) {
-    let row = 0;
-    for (let key of this._envStat.keys()) {
+    let prevStat = null;
+    for (let key of this._envStats.keys()) {
       if (key !== env) {
-        row += this._envStat.get(key).sessions.size + 1;
+        prevStat = this._envStats.get(key);
       } else {
         break;
       }
     }
-    return row;
+    return prevStat ? prevStat.row + prevStat.sessions.size + 1 : 0;
   }
   _getAllErrors() {
     let errors = [];
-    this._envStat.forEach(stat => errors = errors.concat(stat.errors));
+    this._envStats.forEach(envStat => errors = errors.concat(envStat.errors));
     return errors;
   }
 };

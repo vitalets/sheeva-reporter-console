@@ -18,7 +18,7 @@ module.exports = class Printer {
     this._cursor = new StickyCursor();
   }
 
-  printTestsLine(row, {label, tests}) {
+  printTestsLine({row, label, tests}) {
     let line = `${clc.bold(label)}: executed ${num(tests.ended)} of ${num(tests.total)} test(s) `;
     line += tests.failed
       ? clc.red(`${tests.failed} FAILED`)
@@ -26,15 +26,25 @@ module.exports = class Printer {
     this._cursor.write(row, line);
   }
 
-  printSessionLine(row, {index, currentFile, done, doneFiles}) {
+  printSessionLine({row, index, currentFile, duration}) {
     let line = clc.magenta(`Session #${index + 1}: `);
     if (currentFile) {
       const filename = path.basename(currentFile);
       line += `${filename}`;
     } else {
-      line += done ? `done ${doneFiles} file(s)` : `starting...`;
+      line += duration ? `done` : `starting...`;
     }
     this._cursor.write(row, line);
+  }
+
+  printSessionBars(envStats) {
+    const maxWidth = 80;
+    envStats.forEach((envStat, env) => {
+      const max = getMaxDuration(envStat.sessions);
+      const koef = maxWidth / max;
+      normalizeDurations(envStat.sessions, koef);
+      envStat.sessions.forEach(sessionStat => this._printSessionBar(sessionStat, maxWidth));
+    });
   }
 
   printFooter({errors, duration}) {
@@ -52,10 +62,30 @@ module.exports = class Printer {
     console.log(`Time: ${clc.cyan(duration)} ms`);
     console.log(`Done.`);
   }
+
+  _printSessionBar(sessionStat, maxWidth) {
+    const label = clc.magenta(`Session #${sessionStat.index + 1}: `);
+    const bar = clc.green('▇'.repeat(sessionStat.normalDuration));
+    const spacer = ' '.repeat(maxWidth - sessionStat.normalDuration + 1);
+    const footer = `${sessionStat.doneFiles} file(s), ${clc.cyan(sessionStat.duration)} ms`;
+    const line = label + bar + spacer + footer;
+    this._cursor.write(sessionStat.row, line);
+  }
+
 };
 
 function num(str) {
   return clc.blue.bold(str);
+}
+
+function getMaxDuration(sessions) {
+  let max = 0;
+  sessions.forEach(stat => max = Math.max(max, stat.duration));
+  return max;
+}
+
+function normalizeDurations(sessions, koef) {
+  sessions.forEach(stat => stat.normalDuration = Math.round(stat.duration * koef));
 }
 
 function formatAssertionError(data) {

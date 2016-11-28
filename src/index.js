@@ -19,9 +19,13 @@ module.exports = class ProgressReporter {
         break;
       }
       case 'RUNNER_END': {
-        this._collector.runnerEnd();
-        this._printer.printSessionBars();
-        this._printer.printFooter();
+        if (data.error) {
+          this._printer.printRunnerError(data);
+        } else {
+          this._collector.runnerEnd();
+          this._printer.printSessionBars();
+          this._printer.printFooter();
+        }
         break;
       }
       case 'ENV_START': {

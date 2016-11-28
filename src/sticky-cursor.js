@@ -14,10 +14,6 @@ module.exports = class StickyCursor {
     this._maxRow = 0;
   }
 
-  get maxRow() {
-    return this._maxRow;
-  }
-
   write(row, str) {
     if (row < this._maxRow) {
       this._writeUp(row, str);

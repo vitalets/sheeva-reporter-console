@@ -77,25 +77,27 @@ module.exports = class Printer {
     }
   }
 
+  printRunnerError(data) {
+    console.error(data.error);
+  }
+
   printSessionBars() {
-    console.log(chalk.yellow('Concurrency report:'));
+    this._cursor.clear();
     const comfortBarsWidth = 60;
     const labelsWidth = 50;
     const barsWidth = Math.min(comfortBarsWidth, process.stdout.columns - labelsWidth);
-    let row = -1;
     this._collector.envStats.forEach((envStat, env) => {
       const max = getMaxDuration(envStat.sessions);
       const koef = barsWidth / max;
       normalizeDurations(envStat.sessions, koef);
-      ++row;
-      console.log(getEnvLabel(envStat));
+      this.printEnvLine({env});
       envStat.sessions.forEach(sessionStat => {
-        this._printSessionBar(++row, sessionStat, barsWidth, max);
+        this._printSessionBar(sessionStat, barsWidth, max);
       });
     });
   }
 
-  _printSessionBar(row, sessionStat, maxWidth, maxValue) {
+  _printSessionBar(sessionStat, maxWidth, maxValue) {
     const {index, duration, tests, files} = sessionStat;
     const normalDuration = sessionStat.normalDuration > 0 ? sessionStat.normalDuration : 0;
     const label = getSessionLabel({index});
@@ -104,7 +106,6 @@ module.exports = class Printer {
     const durationStr = duration === maxValue ? chalk.red(duration) : chalk.cyan(duration);
     const footer = `${chalk.cyan(durationStr)} ms, ${tests} test(s), ${files} file(s)`;
     const line = label + bar + spacer + footer;
-    //this._cursor.write(row, line);
     console.log(line);
   }
 

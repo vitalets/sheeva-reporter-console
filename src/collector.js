@@ -5,16 +5,39 @@
 module.exports = class Collector {
   constructor() {
     this._envStats = new Map();
-    this._startTime = Date.now();
+    this._slots = new Set();
+    this._runnerStat = {};
   }
+
+  get runnerStat() {
+    return this._runnerStat;
+  }
+
   get envStats() {
     return this._envStats;
   }
-  runnerStart(data) {
-    data.envs.forEach(env => {
+
+  get slots() {
+    return this._slots;
+  }
+
+  runnerStart({files, envs, config, envLabels, timestamp}) {
+    Object.assign(this._runnerStat, {
+      files,
+      envs,
+      config,
+      startTime: timestamp,
+      duration: null,
+      errors: null,
+    });
+    envs.forEach(env => {
       this._envStats.set(env, {
-        row: null,
-        label: '',
+        index: this._envStats.size,
+        label: envLabels.get(env),
+        sessions: new Map(),
+        errors: [],
+        started: false,
+        ended: false,
         tests: {
           total: 0,
           running: 0,
@@ -22,63 +45,63 @@ module.exports = class Collector {
           success: 0,
           failed: 0,
         },
-        errors: [],
-        sessions: new Map(),
       });
     });
   }
+
   runnerEnd() {
-    return {
+    Object.assign(this._runnerStat, {
       errors: this._getAllErrors(),
-      duration: Date.now() - this._startTime
-    };
+      duration: Date.now() - this._runnerStat.startTime,
+    });
   }
+
   envStart(data) {
-    const envStat = this._getEnvStat(data);
-    envStat.label = data.label;
+    const envStat = this.getEnvStat(data);
+    envStat.started = true;
     envStat.tests.total = data.testsCount;
-    envStat.row = this._getRow(data.env);
-    return envStat;
   }
+
   sessionStart(data) {
-    const envStat = this._getEnvStat(data);
-    const sessionStat = {
-      index: envStat.sessions.size,
-      row: envStat.row + envStat.sessions.size + 1,
+    const sessionStat = this.getSessionStat(data);
+    Object.assign(sessionStat, {
+      index: data.session.index,
       currentFile: '',
       files: 0,
       tests: 0,
       started: data.timestamp,
       duration: null,
-    };
-    envStat.sessions.set(data.session, sessionStat);
-    return sessionStat;
+    });
+    this._slots.add(data.session);
   }
+
   sessionEnd(data) {
-    const sessionStat = this._getSessionStat(data);
+    const sessionStat = this.getSessionStat(data);
     sessionStat.currentFile = '';
     sessionStat.duration = data.timestamp - sessionStat.started;
-    return sessionStat;
+    this._slots.delete(data.session);
   }
+
   rootSuiteStart(data) {
-    const sessionStat = this._getSessionStat(data);
+    const sessionStat = this.getSessionStat(data);
     sessionStat.currentFile = data.suite.name;
-    return sessionStat;
   }
+
   rootSuiteEnd(data) {
-    const sessionStat = this._getSessionStat(data);
+    const sessionStat = this.getSessionStat(data);
     sessionStat.files++;
-    return sessionStat;
   }
+
   hookEnd(data) {
     if (data.error) {
-      const envStat = this._getEnvStat(data);
+      const envStat = this.getEnvStat(data);
       envStat.errors.push(data);
     }
   }
+
   testEnd(data) {
-    const envStat = this._getEnvStat(data);
-    const sessionStat = this._getSessionStat(data);
+    const envStat = this.getEnvStat(data);
+    const sessionStat = this.getSessionStat(data);
     envStat.tests.ended++;
     sessionStat.tests++;
     if (data.error) {
@@ -87,26 +110,22 @@ module.exports = class Collector {
     } else {
       envStat.tests.success++;
     }
-    return envStat;
   }
-  _getEnvStat(data) {
+
+  getEnvStat(data) {
     return this._envStats.get(data.env);
   }
-  _getSessionStat(data) {
-    const envStat = this._getEnvStat(data);
-    return envStat.sessions.get(data.session);
-  }
-  _getRow(env) {
-    let prevStat = null;
-    for (let key of this._envStats.keys()) {
-      if (key !== env) {
-        prevStat = this._envStats.get(key);
-      } else {
-        break;
-      }
+
+  getSessionStat(data) {
+    const envStat = this.getEnvStat({env: data.session.env});
+    let sessionStat = envStat.sessions.get(data.session);
+    if (!sessionStat) {
+      sessionStat = {};
+      envStat.sessions.set(data.session, sessionStat);
     }
-    return prevStat ? prevStat.row + prevStat.sessions.size + 1 : 0;
+    return sessionStat;
   }
+
   _getAllErrors() {
     let errors = [];
     this._envStats.forEach(envStat => errors = errors.concat(envStat.errors));

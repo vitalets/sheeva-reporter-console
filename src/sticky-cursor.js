@@ -1,11 +1,11 @@
 /**
- * Sticks to some line in terminal and allows to update all lines below later
+ * Sticks to some line in terminal and allows to update all lines below later.
+ * Cursor is always sitting on the maxRow.
  *
  * @type {StickyCursor}
  */
 
-const clc = require('cli-color');
-const EOL = require('os').EOL;
+const ae = require('ansi-escapes');
 
 module.exports = class StickyCursor {
   constructor () {
@@ -14,28 +14,51 @@ module.exports = class StickyCursor {
     this._maxRow = 0;
   }
 
+  get maxRow() {
+    return this._maxRow;
+  }
+
   write(row, str) {
-    this._ensureRow(row);
-    this._upTo(row);
-    process.stdout.write(clc.erase.line);
-    process.stdout.write(clc.move.left(clc.windowSize.width));
-    process.stdout.write(str);
-    this._downFrom(row);
+    if (row < this._maxRow) {
+      this._writeUp(row, str);
+    } else {
+      this._writeDown(row, str);
+    }
   }
 
-  _upTo(row) {
-    process.stdout.write(clc.move.up(this._maxRow - row));
+  clear() {
+    this.cut(0);
   }
 
-  _ensureRow(row) {
+  cut(row) {
+    if (row < this._maxRow) {
+      process.stdout.write(ae.eraseLines(this._maxRow - row + 1));
+      this._maxRow = row;
+    }
+  }
+
+  isOutOfScreen(row) {
+    return row >= process.stdout.rows - 1;
+  }
+
+  _writeDown(row, str) {
     for (let i = this._maxRow; i < row + 1; i++) {
-      process.stdout.write(EOL);
+      console.log(i === row ? str : '');
       this._maxRow++;
     }
   }
 
-  _downFrom(row) {
-    process.stdout.write(clc.move.down(this._maxRow - row));
-    process.stdout.write(clc.move.left(clc.windowSize.width));
+  _writeUp(row, str) {
+    const minRow = this._maxRow - process.stdout.rows;
+    if (row >= minRow) {
+      process.stdout.write(ae.cursorUp(this._maxRow - row));
+      process.stdout.write(ae.eraseLine);
+      process.stdout.write(String(str));
+      process.stdout.write(ae.cursorDown(this._maxRow - row));
+      process.stdout.write(ae.cursorLeft);
+    } else {
+      // dont print out of screen up
+    }
   }
 };
+

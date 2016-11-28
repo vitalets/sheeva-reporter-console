@@ -21,11 +21,12 @@ module.exports = class Collector {
     return this._slots;
   }
 
-  runnerStart({files, envs, config, envLabels, timestamp}) {
+  runnerStart({files, envs, config, envLabels, timestamp, hasOnly}) {
     Object.assign(this._runnerStat, {
       files,
       envs,
       config,
+      hasOnly,
       startTime: timestamp,
       duration: null,
       errors: null,

@@ -13,9 +13,12 @@ module.exports = class Printer {
   }
 
   printHeader() {
-    const {files, envs, config} = this._collector.runnerStat;
+    const {files, envs, config, hasOnly} = this._collector.runnerStat;
     console.log(`Sheeva started.`);
     console.log(`Processed ${num(files.length)} file(s).`);
+    if (hasOnly) {
+      console.log(`Tests with ${chalk.yellow('ONLY')} found.`);
+    }
     console.log(`Running on ${num(envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
   }
 

@@ -17,7 +17,7 @@ module.exports = class Printer {
     console.log(`Sheeva started.`);
     console.log(`Processed ${num(files.length)} file(s).`);
     if (hasOnly) {
-      console.log(`Tests with ${chalk.yellow('ONLY')} found.`);
+      console.log(chalk.yellow('ONLY mode.'));
     }
     console.log(`Running on ${num(envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
   }
@@ -81,6 +81,7 @@ module.exports = class Printer {
   }
 
   printRunnerError(data) {
+    console.error('Sheeva error!');
     console.error(data.error);
   }
 

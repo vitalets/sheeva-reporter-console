@@ -63,6 +63,11 @@ module.exports = class Collector {
     envStat.tests.total = data.testsCount;
   }
 
+  envEnd(data) {
+    const envStat = this.getEnvStat(data);
+    envStat.ended = true;
+  }
+
   sessionStart(data) {
     const sessionStat = this.getSessionStat(data);
     Object.assign(sessionStat, {

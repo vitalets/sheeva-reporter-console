@@ -21,6 +21,7 @@ module.exports = class ProgressReporter {
       case 'RUNNER_END': {
         if (data.error) {
           this._printer.printRunnerError(data);
+          process.exit(1);
         } else {
           this._collector.runnerEnd();
           this._printer.printSessionBars();
@@ -34,7 +35,8 @@ module.exports = class ProgressReporter {
         break;
       }
       case 'ENV_END': {
-        //console.log(event, data.env);
+        this._collector.envEnd(data);
+        this._printer.printEnvLine(data);
         break;
       }
       case 'SESSION_START': {

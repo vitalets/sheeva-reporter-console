@@ -15,7 +15,8 @@ module.exports = class Printer {
   printHeader() {
     const {files, envs, config, hasOnly} = this._collector.runnerStat;
     console.log(`Sheeva started.`);
-    console.log(`Processed ${num(files.length)} file(s).`);
+    const strFiles = `Processed ${num(files.length)} file(s).`;
+    console.log(files.length ? strFiles : chalk.red(strFiles));
     if (hasOnly) {
       console.log(chalk.yellow('ONLY mode.'));
     }

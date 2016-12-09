@@ -76,14 +76,20 @@ module.exports = class Collector {
       files: 0,
       tests: 0,
       started: data.timestamp,
+      ending: false,
       duration: null,
     });
     this._slots.add(data.session);
   }
 
-  sessionEnd(data) {
+  sessionEnding(data) {
     const sessionStat = this.getSessionStat(data);
     sessionStat.currentFile = '';
+    sessionStat.ending = true;
+  }
+
+  sessionEnd(data) {
+    const sessionStat = this.getSessionStat(data);
     sessionStat.duration = data.timestamp - sessionStat.started;
     this._slots.delete(data.session);
   }

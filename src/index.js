@@ -19,18 +19,13 @@ module.exports = class ProgressReporter {
         break;
       }
       case 'RUNNER_END': {
-        let exitCode;
         if (data.error) {
           this._printer.printRunnerError(data);
-          exitCode = 1;
         } else {
           this._collector.runnerEnd();
           this._printer.printSessionBars();
           this._printer.printFooter();
-          exitCode = this._collector.runnerStat.errors > 0 ? 1 : 0;
         }
-        // use settimeout to allow sheeva finish operations in current tick
-        setTimeout(() => process.exit(exitCode), 0);
         break;
       }
       case 'ENV_START': {
@@ -46,6 +41,11 @@ module.exports = class ProgressReporter {
       case 'SESSION_START': {
         this._collector.sessionStart(data);
         this._printer.printSessions(data);
+        break;
+      }
+      case 'SESSION_ENDING': {
+        this._collector.sessionEnding(data);
+        this._printer.printSessions();
         break;
       }
       case 'SESSION_END': {

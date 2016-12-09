@@ -128,13 +128,13 @@ module.exports = class Printer {
   }
 
   _getSessionLine(session) {
-    const {index, currentFile, duration} = this._collector.getSessionStat({session});
+    const {index, currentFile, ending} = this._collector.getSessionStat({session});
     let line = getSessionLabel({index});
     if (currentFile) {
       const filename = path.basename(currentFile);
       line += `${filename}`;
     } else {
-      line += duration ? `done` : `starting...`;
+      line += ending ? `ending...` : `starting...`;
     }
     return line;
   }

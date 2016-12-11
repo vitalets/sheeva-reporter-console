@@ -75,22 +75,30 @@ module.exports = class Collector {
       currentFile: '',
       files: 0,
       tests: 0,
-      started: data.timestamp,
-      ending: false,
+      start: data.timestamp,
+      started: null,
+      ending: null,
+      end: null,
       duration: null,
     });
     this._slots.add(data.session);
   }
 
+  sessionStarted(data) {
+    const sessionStat = this.getSessionStat(data);
+    sessionStat.started = data.timestamp;
+  }
+
   sessionEnding(data) {
     const sessionStat = this.getSessionStat(data);
     sessionStat.currentFile = '';
-    sessionStat.ending = true;
+    sessionStat.ending = data.timestamp;
   }
 
   sessionEnd(data) {
     const sessionStat = this.getSessionStat(data);
-    sessionStat.duration = data.timestamp - sessionStat.started;
+    sessionStat.end = data.timestamp;
+    sessionStat.duration = sessionStat.end - sessionStat.start;
     this._slots.delete(data.session);
   }
 

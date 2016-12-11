@@ -43,6 +43,10 @@ module.exports = class ProgressReporter {
         this._printer.printSessions(data);
         break;
       }
+      case 'SESSION_STARTED': {
+        this._collector.sessionStarted(data);
+        break;
+      }
       case 'SESSION_ENDING': {
         this._collector.sessionEnding(data);
         this._printer.printSessions();

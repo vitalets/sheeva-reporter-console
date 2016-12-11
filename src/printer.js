@@ -49,7 +49,7 @@ module.exports = class Printer {
         : (tests.success ? chalk.green(`SUCCESS`) : '');
       line += `${action} ${counts} ${status}`;
     } else {
-      line += `planned`;
+      line += `planned ${num(tests.total)} test(s)`;
     }
     this._cursor.write(index, line);
   }
@@ -103,14 +103,17 @@ module.exports = class Printer {
   }
 
   _printSessionBar(sessionStat, maxWidth, maxValue) {
-    const {index, duration, tests, files} = sessionStat;
-    const normalDuration = sessionStat.normalDuration > 0 ? sessionStat.normalDuration : 0;
+    const {index, duration, normalized, tests, files} = sessionStat;
     const label = getSessionLabel({index});
-    const bar = chalk.green('▇'.repeat(normalDuration));
-    const spacer = repeatStr(' ', maxWidth - normalDuration + 1);
-    const durationStr = duration === maxValue ? chalk.red(duration) : chalk.cyan(duration);
-    const footer = `${chalk.cyan(durationStr)} ms, ${tests} test(s), ${files} file(s)`;
-    const line = label + bar + spacer + footer;
+    const starting = chalk.white('▇'.repeat(normalized.starting));
+    const testing = chalk.green('▇'.repeat(normalized.testing));
+    const ending = chalk.white('▇'.repeat(normalized.ending));
+    const total = normalized.starting + normalized.testing + normalized.ending;
+    const spacer = repeatStr(' ', maxWidth - total + 2);
+    const durationStr = duration === maxValue ? chalk.cyan(duration) : duration;
+    const footer = `${durationStr} ms, ${tests} test(s), ${files} file(s)`;
+    const bar = `${starting}${testing}${ending}`;
+    const line = `${label}${bar}${spacer}${footer}`;
     console.log(line);
   }
 
@@ -165,7 +168,13 @@ function getMaxDuration(sessions) {
 }
 
 function normalizeDurations(sessions, koef) {
-  sessions.forEach(stat => stat.normalDuration = Math.round(stat.duration * koef));
+  sessions.forEach(stat => {
+    stat.normalized = {
+      starting: Math.round((stat.started - stat.start) * koef),
+      testing: Math.round((stat.ending - stat.started) * koef),
+      ending: Math.round((stat.end - stat.ending) * koef),
+    };
+  });
 }
 
 function formatAssertionError(data) {

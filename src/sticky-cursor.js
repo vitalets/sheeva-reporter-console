@@ -45,6 +45,7 @@ module.exports = class StickyCursor {
   }
 
   _writeUp(row, str) {
+    // todo: use https://github.com/jonschlinkert/window-size
     const minRow = this._maxRow - process.stdout.rows;
     if (row >= minRow) {
       process.stdout.write(ae.cursorUp(this._maxRow - row));

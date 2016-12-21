@@ -13,12 +13,13 @@ module.exports = class Printer {
   }
 
   printHeader() {
-    const {files, envs, config, hasOnly} = this._collector.runnerStat;
+    const {files, envs, config, onlyFiles} = this._collector.runnerStat;
     console.log(`Sheeva started.`);
     const strFiles = `Processed ${num(files.length)} file(s).`;
     console.log(files.length ? strFiles : chalk.red(strFiles));
-    if (hasOnly) {
-      console.log(chalk.yellow('ONLY mode.'));
+    if (onlyFiles.length) {
+      const fileList = chalk.gray(onlyFiles.join(', '));
+      console.log(`Found ${chalk.yellow.bold('ONLY')} in ${num(onlyFiles.length)} file(s): ${fileList}`);
     }
     console.log(`Running on ${num(envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
   }
@@ -49,7 +50,7 @@ module.exports = class Printer {
         : (tests.success ? chalk.green(`SUCCESS`) : '');
       line += `${action} ${counts} ${status}`;
     } else {
-      line += `planned ${num(tests.total)} test(s)`;
+      line += chalk.gray(`planned ${num(tests.total)} test(s)`);
     }
     this._cursor.write(index, line);
   }

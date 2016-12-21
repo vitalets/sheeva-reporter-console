@@ -21,12 +21,12 @@ module.exports = class Collector {
     return this._slots;
   }
 
-  runnerStart({files, envs, config, envLabels, timestamp, hasOnly}) {
+  runnerStart({files, envs, config, envLabels, timestamp, onlyFiles, envTests}) {
     Object.assign(this._runnerStat, {
       files,
       envs,
       config,
-      hasOnly,
+      onlyFiles,
       startTime: timestamp,
       duration: null,
       errors: null,
@@ -40,7 +40,7 @@ module.exports = class Collector {
         started: false,
         ended: false,
         tests: {
-          total: 0,
+          total: envTests.get(env).reduce((res, tests) => res + tests.length, 0),
           running: 0,
           ended: 0,
           success: 0,

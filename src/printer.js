@@ -34,7 +34,7 @@ module.exports = class Printer {
   printFooter() {
     const {errors, duration} = this._collector.runnerStat;
     this._printErrors(errors);
-    console.log(`Errors: ${errors.length}`);
+    console.log(chalk[errors.length ? 'red' : 'green'](`Errors: ${chalk.bold(errors.length)}`));
     console.log(`Total time: ${chalk.cyan(duration)} ms`);
     console.log(`Done.`);
   }

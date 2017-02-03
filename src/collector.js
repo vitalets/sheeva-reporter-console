@@ -7,6 +7,7 @@ module.exports = class Collector {
     this._envStats = new Map();
     this._slots = new Set();
     this._runnerStat = {};
+    this._splits = [];
   }
 
   get runnerStat() {
@@ -21,26 +22,29 @@ module.exports = class Collector {
     return this._slots;
   }
 
-  runnerStart({files, envs, config, envLabels, timestamp, onlyFiles, envTests}) {
+  get splits() {
+    return this._splits;
+  }
+
+  runnerStart({files, config, timestamp, onlyFiles}) {
     Object.assign(this._runnerStat, {
-      files,
-      envs,
       config,
+      files,
       onlyFiles,
       startTime: timestamp,
       duration: null,
       errors: null,
     });
-    envs.forEach(env => {
+    config.envs.forEach(env => {
       this._envStats.set(env, {
         index: this._envStats.size,
-        label: envLabels.get(env),
+        label: env.label,
         sessions: new Map(),
         errors: [],
         started: false,
         ended: false,
         tests: {
-          total: envTests.get(env).reduce((res, tests) => res + tests.length, 0),
+          total: 0,
           running: 0,
           ended: 0,
           success: 0,
@@ -112,6 +116,10 @@ module.exports = class Collector {
     sessionStat.files++;
   }
 
+  suiteSplit(data) {
+    this._splits.push(data.suite.name);
+  }
+
   hookEnd(data) {
     if (data.error) {
       const envStat = this.getEnvStat(data);
@@ -152,3 +160,7 @@ module.exports = class Collector {
     return errors;
   }
 };
+
+function getEnvTotalTests(env, envFlatSuites) {
+  return envFlatSuites.get(env).reduce((res, flatSuite) => res + flatSuite.tests.length, 0);
+}

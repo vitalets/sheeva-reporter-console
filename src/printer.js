@@ -13,7 +13,7 @@ module.exports = class Printer {
   }
 
   printHeader() {
-    const {files, envs, config, onlyFiles} = this._collector.runnerStat;
+    const {files, config, onlyFiles} = this._collector.runnerStat;
     console.log(`Sheeva started.`);
     const strFiles = `Processed ${num(files.length)} file(s).`;
     console.log(files.length ? strFiles : chalk.red(strFiles));
@@ -21,7 +21,7 @@ module.exports = class Printer {
       const fileList = chalk.gray(onlyFiles.join(', '));
       console.log(`Found ${chalk.yellow.bold('ONLY')} in ${num(onlyFiles.length)} file(s): ${fileList}`);
     }
-    console.log(`Running on ${num(envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
+    console.log(`Running on ${num(config.envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
   }
 
   printEnvs() {
@@ -36,12 +36,13 @@ module.exports = class Printer {
     this._printErrors(errors);
     console.log(chalk.bold[errors.length ? 'red' : 'green'](`Errors: ${errors.length}`));
     console.log(`Total time: ${chalk.cyan(duration)} ms`);
+    console.log(`Splits: ${this._collector.splits.length}`);
     console.log(`Done.`);
   }
 
   printEnvLine(data) {
     const {label, tests, index, started, ended} = this._collector.getEnvStat(data);
-    let line = getEnvLabel({label});
+    let line = formatEnvLabel({label});
     if (started) {
       const action = ended ? `done` : `executed`;
       const counts = `${num(tests.ended)} of ${num(tests.total)} test(s)`;
@@ -50,7 +51,7 @@ module.exports = class Printer {
         : (tests.success ? chalk.green(`SUCCESS`) : '');
       line += `${action} ${counts} ${status}`;
     } else {
-      line += chalk.gray(`planned ${num(tests.total)} test(s)`);
+      line += chalk.gray(`planned`);
     }
     this._cursor.write(index, line);
   }
@@ -123,8 +124,10 @@ module.exports = class Printer {
       if (data.error.name === 'AssertionError') {
         console.log(formatAssertionError(data))
       } else if (data.error.name === 'UnexpectedError') {
-//        console.log(data.error.originalError || formatAssertionError(data));
         console.log(formatAssertionError(data));
+        if (data.error.originalError) {
+          console.log(data.error.originalError);
+        }
       } else {
         console.log(data.error)
       }
@@ -153,7 +156,7 @@ function repeatStr(str, count) {
   return str.repeat(count);
 }
 
-function getEnvLabel({label}) {
+function formatEnvLabel({label}) {
   return `${chalk.bold(label)}: `
 }
 

@@ -64,7 +64,7 @@ module.exports = class Collector {
   envStart(data) {
     const envStat = this.getEnvStat(data);
     envStat.started = true;
-    envStat.tests.total = data.testsCount;
+    envStat.tests.total = data.env.testsCount;
   }
 
   envEnd(data) {

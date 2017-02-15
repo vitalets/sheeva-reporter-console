@@ -26,11 +26,14 @@ module.exports = class Collector {
     return this._splits;
   }
 
-  runnerStart({files, config, timestamp, onlyFiles}) {
+  runnerStart({files, config, timestamp, onlyFiles, skippedSuites, skippedTests, skippedInFiles}) {
     Object.assign(this._runnerStat, {
       config,
       files,
       onlyFiles,
+      skippedSuites,
+      skippedTests,
+      skippedInFiles,
       startTime: timestamp,
       duration: null,
       errors: null,

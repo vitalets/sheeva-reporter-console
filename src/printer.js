@@ -13,14 +13,21 @@ module.exports = class Printer {
   }
 
   printHeader() {
-    const {files, config, onlyFiles} = this._collector.runnerStat;
+    const {files, config, onlyFiles, skippedSuites, skippedTests, skippedInFiles} = this._collector.runnerStat;
     console.log(`Sheeva started.`);
     const strFiles = `Processed ${num(files.length)} file(s).`;
     console.log(files.length ? strFiles : chalk.red(strFiles));
     if (onlyFiles.length) {
-      const fileList = chalk.gray(onlyFiles.join(', '));
-      console.log(`Found ${chalk.yellow.bold('ONLY')} in ${num(onlyFiles.length)} file(s): ${fileList}`);
+      console.log(chalk.gray(`ONLY found in ${num(onlyFiles.length)} file(s): ${onlyFiles.join(', ')}`));
     }
+    if (skippedSuites.length || skippedTests.length) {
+      const suites = skippedSuites.length ? `${num(skippedSuites.length)} suite(s)` : '';
+      const tests = skippedTests.length ? `${num(skippedTests.length)} test(s)` : '';
+      const and = suites && tests ? ' and ' : '';
+      const files = ` in ${num(skippedInFiles.length)} file(s): ${skippedInFiles.join(', ')}`;
+      console.log(chalk.gray(`SKIP ${suites}${and}${tests}${files}`));
+    }
+
     console.log(`Running on ${num(config.envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
   }
 

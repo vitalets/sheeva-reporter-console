@@ -14,8 +14,8 @@ module.exports = class Printer {
 
   printHeader() {
     const {files, config, onlyFiles, skippedSuites, skippedTests, skippedInFiles} = this._collector.runnerStat;
-    console.log(`Sheeva started.`);
-    const strFiles = `Processed ${num(files.length)} file(s).`;
+    console.log(`Sheeva started`);
+    const strFiles = `Processed ${num(files.length)} file(s)`;
     console.log(files.length ? strFiles : chalk.red(strFiles));
     if (onlyFiles.length) {
       console.log(chalk.gray(`ONLY found in ${num(onlyFiles.length)} file(s): ${onlyFiles.join(', ')}`));
@@ -28,7 +28,7 @@ module.exports = class Printer {
       console.log(chalk.gray(`SKIP ${suites}${and}${tests}${files}`));
     }
 
-    console.log(`Running on ${num(config.envs.length)} env(s) with concurrency = ${num(config.concurrency)}.`);
+    console.log(`Running on ${num(config.envs.length)} env(s) with concurrency = ${num(config.concurrency)}`);
   }
 
   printEnvs() {

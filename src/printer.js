@@ -39,9 +39,8 @@ module.exports = class Printer {
   }
 
   printFooter() {
-    const {errors, duration} = this._collector.runnerStat;
-    this._printErrors(errors);
-    console.log(chalk.bold[errors.length ? 'red' : 'green'](`Errors: ${errors.length}`));
+    const {duration, errorsData} = this._collector.runnerStat;
+    console.log(chalk.bold[errorsData.size ? 'red' : 'green'](`Errors: ${errorsData.size}`));
     console.log(`Total time: ${chalk.cyan(duration)} ms`);
     console.log(`Splits: ${this._collector.splits.length}`);
     console.log(`Done.`);
@@ -75,7 +74,7 @@ module.exports = class Printer {
         return;
       }
 
-      // if data not passed - session was removed, so print each session
+      // if data not passed - session was removed, so re-print each session
       if (!data || session === data.session) {
         const line = this._getSessionLine(session);
         this._cursor.write(row, line);
@@ -90,9 +89,28 @@ module.exports = class Printer {
     }
   }
 
-  printRunnerError(data) {
-    console.error('Sheeva error!');
-    console.error(data.error);
+  // printRunnerError({error}) {
+  //   if (!error.suite && !error.test) {
+  //     console.error('Breaking error!');
+  //     console.error(data.error);
+  //   }
+  // }
+
+  printErrors() {
+    const {errorsData} = this._collector.runnerStat;
+    errorsData.forEach(data => this.printError(data));
+  }
+
+  printError(data) {
+    if (isAssertionError(data.error)) {
+      console.log(formatAssertionError(data));
+      if (data.error.originalError) {
+        console.error(data.error.originalError);
+      }
+    } else {
+      console.error('Breaking error!');
+      console.error(data.error);
+    }
   }
 
   printSessionBars() {
@@ -124,21 +142,6 @@ module.exports = class Printer {
     const bar = `${starting}${testing}${ending}`;
     const line = `${label}${bar}${spacer}${footer}`;
     console.log(line);
-  }
-
-  _printErrors(errors) {
-    errors.forEach(data => {
-      if (data.error.name === 'AssertionError') {
-        console.log(formatAssertionError(data))
-      } else if (data.error.name === 'UnexpectedError') {
-        console.log(formatAssertionError(data));
-        if (data.error.originalError) {
-          console.log(data.error.originalError);
-        }
-      } else {
-        console.log(data.error)
-      }
-    });
   }
 
   _getSessionLine(session) {
@@ -188,11 +191,16 @@ function normalizeDurations(sessions, koef) {
   });
 }
 
-function formatAssertionError(data) {
+// todo: more universal way to detect assertion error?
+function isAssertionError(error) {
+  return error.name === 'AssertionError' || error.name === 'UnexpectedError'
+}
+
+function formatAssertionError({error, test}) {
   return []
-    .concat(data.test.parents.map(suite => suite.name))
-    .concat([data.test.name])
+    .concat(test.parents.map(suite => suite.name))
+    .concat([test.name])
     .map((item, i) => ' '.repeat(i * 2) + item)
-    .concat([data.error.message])
+    .concat([error.message])
     .join('\n');
 }

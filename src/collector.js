@@ -26,42 +26,14 @@ module.exports = class Collector {
     return this._splits;
   }
 
-  runnerStart({files, config, timestamp, onlyFiles, skippedSuites, skippedTests, skippedInFiles}) {
-    Object.assign(this._runnerStat, {
-      config,
-      files,
-      onlyFiles,
-      skippedSuites,
-      skippedTests,
-      skippedInFiles,
-      startTime: timestamp,
-      duration: null,
-      errors: null,
-    });
-    config.envs.forEach(env => {
-      this._envStats.set(env, {
-        index: this._envStats.size,
-        label: env.label,
-        sessions: new Map(),
-        errors: [],
-        started: false,
-        ended: false,
-        tests: {
-          total: 0,
-          running: 0,
-          ended: 0,
-          success: 0,
-          failed: 0,
-        },
-      });
-    });
+  runnerStart(data) {
+    this._createRunnerStat(data);
+    data.config.envs.forEach(env => this._createEnvStat(env));
   }
 
-  runnerEnd() {
-    Object.assign(this._runnerStat, {
-      errors: this._getAllErrors(),
-      duration: Date.now() - this._runnerStat.startTime,
-    });
+  runnerEnd(data) {
+    this._runnerStat.duration = Date.now() - this._runnerStat.startTime;
+    this._storeErrorData(data);
   }
 
   envStart(data) {
@@ -107,16 +79,18 @@ module.exports = class Collector {
     sessionStat.end = data.timestamp;
     sessionStat.duration = sessionStat.end - sessionStat.start;
     this._slots.delete(data.session);
+    this._storeErrorData(data);
   }
 
-  rootSuiteStart(data) {
+  topSuiteStart(data) {
     const sessionStat = this.getSessionStat(data);
     sessionStat.currentFile = data.suite.name;
   }
 
-  rootSuiteEnd(data) {
+  topSuiteEnd(data) {
     const sessionStat = this.getSessionStat(data);
     sessionStat.files++;
+    this._storeErrorData(data);
   }
 
   suiteSplit(data) {
@@ -124,10 +98,7 @@ module.exports = class Collector {
   }
 
   hookEnd(data) {
-    if (data.error) {
-      const envStat = this.getEnvStat(data);
-      envStat.errors.push(data);
-    }
+    this._storeErrorData(data);
   }
 
   testEnd(data) {
@@ -137,10 +108,10 @@ module.exports = class Collector {
     sessionStat.tests++;
     if (data.error) {
       envStat.tests.failed++;
-      envStat.errors.push(data);
     } else {
       envStat.tests.success++;
     }
+    this._storeErrorData(data);
   }
 
   getEnvStat(data) {
@@ -157,13 +128,42 @@ module.exports = class Collector {
     return sessionStat;
   }
 
-  _getAllErrors() {
-    let errors = [];
-    this._envStats.forEach(envStat => errors = errors.concat(envStat.errors));
-    return errors;
+  _createEnvStat(env) {
+    this._envStats.set(env, {
+      index: this._envStats.size,
+      label: env.label,
+      sessions: new Map(),
+      errors: new Set(),
+      started: false,
+      ended: false,
+      tests: {
+        total: 0,
+        running: 0,
+        ended: 0,
+        success: 0,
+        failed: 0,
+      },
+    });
+  }
+
+  _createRunnerStat(data) {
+    const {files, config, timestamp, onlyFiles, skippedSuites, skippedTests, skippedInFiles} = data;
+    Object.assign(this._runnerStat, {
+      config,
+      files,
+      onlyFiles,
+      skippedSuites,
+      skippedTests,
+      skippedInFiles,
+      startTime: timestamp,
+      duration: 0,
+      errorsData: new Map(),
+    });
+  }
+
+  _storeErrorData(data) {
+    if (data.error && !this._runnerStat.errorsData.has(data.error)) {
+      this._runnerStat.errorsData.set(data.error, data);
+    }
   }
 };
-
-function getEnvTotalTests(env, envFlatSuites) {
-  return envFlatSuites.get(env).reduce((res, flatSuite) => res + flatSuite.tests.length, 0);
-}

@@ -19,13 +19,12 @@ module.exports = class ProgressReporter {
         break;
       }
       case 'RUNNER_END': {
-        if (data.error) {
-          this._printer.printRunnerError(data);
-        } else {
-          this._collector.runnerEnd();
+        this._collector.runnerEnd(data);
+        if (!data.error) {
           this._printer.printSessionBars();
-          this._printer.printFooter();
         }
+        this._printer.printErrors();
+        this._printer.printFooter();
         break;
       }
       case 'ENV_START': {
@@ -59,14 +58,14 @@ module.exports = class ProgressReporter {
       }
       case 'SUITE_START': {
         if (!data.suite.parent) {
-          this._collector.rootSuiteStart(data);
+          this._collector.topSuiteStart(data);
           this._printer.printSessions(data);
         }
         break;
       }
       case 'SUITE_END': {
         if (!data.suite.parent) {
-          this._collector.rootSuiteEnd(data);
+          this._collector.topSuiteEnd(data);
           this._printer.printSessions(data);
         }
         break;

@@ -5,7 +5,8 @@
 module.exports = class Collector {
   constructor() {
     this._envStats = new Map();
-    this._slots = new Set();
+    this._sessions = new Map();
+    this._runningSessions = new Set();
     this._runnerStat = {};
     this._splits = [];
   }
@@ -18,8 +19,12 @@ module.exports = class Collector {
     return this._envStats;
   }
 
-  get slots() {
-    return this._slots;
+  get runningSessions() {
+    return this._runningSessions;
+  }
+
+  get sessions() {
+    return this._sessions;
   }
 
   get splits() {
@@ -31,9 +36,8 @@ module.exports = class Collector {
     data.config.envs.forEach(env => this._createEnvStat(env));
   }
 
-  runnerEnd(data) {
+  runnerEnd() {
     this._runnerStat.duration = Date.now() - this._runnerStat.startTime;
-    this._storeErrorData(data);
   }
 
   envStart(data) {
@@ -48,19 +52,9 @@ module.exports = class Collector {
   }
 
   sessionStart(data) {
-    const sessionStat = this.getSessionStat(data);
-    Object.assign(sessionStat, {
-      index: data.session.index,
-      currentFile: '',
-      files: 0,
-      tests: 0,
-      start: data.timestamp,
-      started: null,
-      ending: null,
-      end: null,
-      duration: null,
-    });
-    this._slots.add(data.session);
+    const sessionStat = this._createSessionStat(data.session);
+    sessionStat.start = data.timestamp;
+    this._runningSessions.add(data.session);
   }
 
   sessionStarted(data) {
@@ -78,7 +72,7 @@ module.exports = class Collector {
     const sessionStat = this.getSessionStat(data);
     sessionStat.end = data.timestamp;
     sessionStat.duration = sessionStat.end - sessionStat.start;
-    this._slots.delete(data.session);
+    this._runningSessions.delete(data.session);
     this._storeErrorData(data);
   }
 
@@ -119,13 +113,7 @@ module.exports = class Collector {
   }
 
   getSessionStat(data) {
-    const envStat = this.getEnvStat({env: data.session.env});
-    let sessionStat = envStat.sessions.get(data.session);
-    if (!sessionStat) {
-      sessionStat = {};
-      envStat.sessions.set(data.session, sessionStat);
-    }
-    return sessionStat;
+    return this._sessions.get(data.session);
   }
 
   _createEnvStat(env) {
@@ -161,9 +149,25 @@ module.exports = class Collector {
     });
   }
 
+  _createSessionStat(session) {
+    const sessionStat = {
+      currentFile: '',
+      files: 0,
+      tests: 0,
+      start: 0,
+      started: null,
+      ending: null,
+      end: null,
+      duration: null,
+    };
+    this._sessions.set(session, sessionStat);
+    return sessionStat;
+  }
+
   _storeErrorData(data) {
     if (data.error && !this._runnerStat.errorsData.has(data.error)) {
       this._runnerStat.errorsData.set(data.error, data);
     }
   }
+
 };

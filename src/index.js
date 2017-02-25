@@ -15,13 +15,16 @@ module.exports = class ProgressReporter {
       case 'RUNNER_START': {
         this._collector.runnerStart(data);
         this._printer.printHeader();
+        this._printer.stickCursor();
         this._printer.printEnvs();
         break;
       }
       case 'RUNNER_END': {
-        this._collector.runnerEnd(data);
+        this._collector.runnerEnd();
+        this._printer.unstickCursor();
+        this._printer.printEnvs();
         if (!data.error) {
-          this._printer.printSessionBars();
+          this._printer.printSlotBars();
         }
         this._printer.printErrors();
         this._printer.printFooter();
@@ -39,41 +42,42 @@ module.exports = class ProgressReporter {
       }
       case 'SESSION_START': {
         this._collector.sessionStart(data);
-        this._printer.printSessions(data);
+        this._printer.printRunningSessions(data);
         break;
       }
       case 'SESSION_STARTED': {
         this._collector.sessionStarted(data);
+        this._printer.printRunningSessions(data);
         break;
       }
       case 'SESSION_ENDING': {
         this._collector.sessionEnding(data);
-        this._printer.printSessions();
+        this._printer.printRunningSessions();
         break;
       }
       case 'SESSION_END': {
         this._collector.sessionEnd(data);
-        this._printer.printSessions();
+        this._printer.printRunningSessions();
         break;
       }
       case 'SUITE_START': {
         if (!data.suite.parent) {
           this._collector.topSuiteStart(data);
-          this._printer.printSessions(data);
+          this._printer.printRunningSessions(data);
         }
         break;
       }
       case 'SUITE_END': {
         if (!data.suite.parent) {
           this._collector.topSuiteEnd(data);
-          this._printer.printSessions(data);
+          this._printer.printRunningSessions(data);
         }
         break;
       }
-      case 'SUITE_SPLIT': {
-        this._collector.suiteSplit(data);
-        break;
-      }
+      // case 'SUITE_SPLIT': {
+      //   this._collector.suiteSplit(data);
+      //   break;
+      // }
       case 'HOOK_END': {
         this._collector.hookEnd(data);
         break;

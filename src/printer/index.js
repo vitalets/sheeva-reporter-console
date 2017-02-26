@@ -5,13 +5,12 @@
 const chalk = require('chalk');
 const path = require('path');
 const StickyCursor = require('./sticky-cursor');
-const Bars = require('./bars');
+const EndedSlots = require('./ended-slots');
 
 module.exports = class Printer {
   constructor(collector) {
     this._collector = collector;
     this._cursor = null;
-    this._bars = new Bars(collector);
   }
 
   stickCursor() {
@@ -90,7 +89,7 @@ module.exports = class Printer {
   }
 
   printSlotBars() {
-    this._bars.print();
+    new EndedSlots(this._collector.sessions).print();
   }
 
   printFooter() {

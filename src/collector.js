@@ -9,6 +9,7 @@ module.exports = class Collector {
     this._runningSessions = new Set();
     this._runnerStat = {};
     this._splits = [];
+    this._config = null;
   }
 
   get runnerStat() {
@@ -31,7 +32,12 @@ module.exports = class Collector {
     return this._splits;
   }
 
+  get config() {
+    return this._config;
+  }
+
   runnerStart(data) {
+    this._config = data.config;
     this._createRunnerStat(data);
     data.config.envs.forEach(env => this._createEnvStat(env));
   }

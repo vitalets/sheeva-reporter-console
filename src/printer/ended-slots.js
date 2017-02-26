@@ -3,6 +3,7 @@
  */
 
 const chalk = require('chalk');
+const {pluralize, leftPad} = require('./utils');
 
 const MAX_BAR_WIDTH = 60;
 const LABELS_WIDTH = 50;
@@ -60,11 +61,11 @@ module.exports = class EndedSlots {
 
   _printBar(totals, index) {
     const {barWidth, duration, testsCount, envBarWidths} = totals;
-    const leftLabel = getSlotLabel(index + 1);
+    const leftLabel = this._getSlotLabel(index + 1);
     const bar = this._getBarString(envBarWidths);
-    const spacer = repeatStr(' ', this._maxBarWidth - barWidth + 2);
+    const spacer = ' '.repeat(Math.max(this._maxBarWidth - barWidth + 2, 0));
     const durationStr = duration === this._maxDuration ? chalk.cyan(duration) : duration;
-    const rightLabel = `${durationStr} ms, ${testsCount} test(s)`;
+    const rightLabel = `${durationStr} ms, ${testsCount} ${pluralize('test', testsCount)}`;
     const line = `${leftLabel}${bar}${spacer}${rightLabel}`;
     console.log(line);
   }
@@ -91,20 +92,13 @@ module.exports = class EndedSlots {
     }
     return color;
   }
+
+  _getSlotLabel(index) {
+    const maxIndexWidth = String(this._slotTotals.size).length;
+    const indexStr = leftPad(index, maxIndexWidth);
+    return chalk.magenta(`Slot #${indexStr}: `);
+  }
 };
-
-/**
- * Native String.repeat throws error for negative count
- */
-function repeatStr(str, count) {
-  count = count < 0 ? 0 : count;
-  return str.repeat(count);
-}
-
-function getSlotLabel(index) {
-  const indexStr = index < 10 ? `${index} ` : `${index}`;
-  return chalk.magenta(`Slot #${indexStr}: `);
-}
 
 function createNewTotals() {
   return {

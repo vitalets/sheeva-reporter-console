@@ -4,6 +4,7 @@
 
 const chalk = require('chalk');
 const path = require('path');
+const {pluralize, leftPad} = require('./utils');
 const StickyCursor = require('./sticky-cursor');
 const EndedSlots = require('./ended-slots');
 
@@ -24,7 +25,7 @@ module.exports = class Printer {
   printHeader() {
     const {files, config, onlyFiles, skippedSuites, skippedTests, skippedInFiles} = this._collector.runnerStat;
     console.log(`Sheeva started`);
-    const strFiles = `Processed ${num(files.length)} file(s)`;
+    const strFiles = `Processed files: ${num(files.length)}`;
     console.log(files.length ? strFiles : chalk.red(strFiles));
     if (onlyFiles.length) {
       console.log(chalk.gray(`ONLY found in ${num(onlyFiles.length)} file(s): ${onlyFiles.join(', ')}`));
@@ -118,7 +119,7 @@ module.exports = class Printer {
 
   _printRunningSessionLine(row, session) {
     const {currentFile, ending} = this._collector.getSessionStat({session});
-    let line = getSlotLabel(session.slotIndex + 1);
+    let line = this._getSlotLabel(session.slotIndex + 1);
     if (currentFile) {
       const filename = path.basename(currentFile);
       line += `${filename}`;
@@ -126,6 +127,12 @@ module.exports = class Printer {
       line += ending ? `ending...` : `starting...`;
     }
     this._cursor.write(row, line);
+  }
+
+  _getSlotLabel(index) {
+    const maxIndexWidth = String(this._collector.config.concurrency).length;
+    const indexStr = leftPad(index, maxIndexWidth);
+    return chalk.magenta(`Slot #${indexStr}: `);
   }
 };
 
@@ -135,11 +142,6 @@ function num(str) {
 
 function formatEnvLabel({label}) {
   return `${chalk.bold(label)}: `
-}
-
-function getSlotLabel(index) {
-  const indexStr = index < 10 ? `${index} ` : `${index}`;
-  return chalk.magenta(`Slot #${indexStr}: `);
 }
 
 // todo: more universal way to detect assertion error?

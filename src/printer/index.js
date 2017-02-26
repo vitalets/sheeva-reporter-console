@@ -4,7 +4,7 @@
 
 const chalk = require('chalk');
 const path = require('path');
-const {pluralize, leftPad} = require('./utils');
+const {pluralize, leftPad, num} = require('./utils');
 const StickyCursor = require('./sticky-cursor');
 const EndedSlots = require('./ended-slots');
 
@@ -25,20 +25,22 @@ module.exports = class Printer {
   printHeader() {
     const {files, config, onlyFiles, skippedSuites, skippedTests, skippedInFiles} = this._collector.runnerStat;
     console.log(`Sheeva started`);
-    const strFiles = `Processed files: ${num(files.length)}`;
+    console.log(`Environments: ${num(config.envs.length)}, concurrency: ${num(config.concurrency)}`);
+    const strFiles = `Files: ${num(files.length)}`;
     console.log(files.length ? strFiles : chalk.red(strFiles));
     if (onlyFiles.length) {
-      console.log(chalk.gray(`ONLY found in ${num(onlyFiles.length)} file(s): ${onlyFiles.join(', ')}`));
+      const filesStr = `${num(onlyFiles.length)} (${chalk.gray(onlyFiles.join(', '))})`;
+      console.log(`Files with ${chalk.bold.yellow('ONLY')}: ${filesStr}`);
     }
-    if (skippedSuites.length || skippedTests.length) {
-      const suites = skippedSuites.length ? `${num(skippedSuites.length)} suite(s)` : '';
-      const tests = skippedTests.length ? `${num(skippedTests.length)} test(s)` : '';
-      const and = suites && tests ? ' and ' : '';
-      const files = ` in ${num(skippedInFiles.length)} file(s): ${skippedInFiles.join(', ')}`;
-      console.log(chalk.gray(`SKIP ${suites}${and}${tests}${files}`));
+    if (skippedInFiles.length) {
+      // const suites = skippedSuites.length ? `${num(skippedSuites.length)} suite(s)` : '';
+      // const tests = skippedTests.length ? `${num(skippedTests.length)} test(s)` : '';
+      // const and = suites && tests ? ' and ' : '';
+      const filesStr = `${num(skippedInFiles.length)} (${chalk.gray(skippedInFiles.join(', '))})`;
+      console.log(`Files with ${chalk.bold.yellow('SKIP')}: ${filesStr}`);
     }
 
-    console.log(`Running on ${num(config.envs.length)} env(s) with concurrency = ${num(config.concurrency)}`);
+
   }
 
   printEnvs() {
@@ -49,7 +51,7 @@ module.exports = class Printer {
 
   printEnvLine(data) {
     const {label, tests, index, started, ended} = this._collector.getEnvStat(data);
-    let line = formatEnvLabel({label});
+    let line = `${chalk.bold(label)}: `;
     if (started) {
       const action = ended ? `done` : `executed`;
       const counts = `${num(tests.ended)} of ${num(tests.total)} test(s)`;
@@ -135,14 +137,6 @@ module.exports = class Printer {
     return chalk.magenta(`Slot #${indexStr}: `);
   }
 };
-
-function num(str) {
-  return chalk.blue.bold(str);
-}
-
-function formatEnvLabel({label}) {
-  return `${chalk.bold(label)}: `
-}
 
 // todo: more universal way to detect assertion error?
 function isAssertionError(error) {

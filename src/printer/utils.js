@@ -2,6 +2,8 @@
  * Utils
  */
 
+const chalk = require('chalk');
+
 /**
  * Simple pluralize
  *
@@ -22,4 +24,14 @@ exports.pluralize = function(word, count) {
  */
 exports.leftPad = function(value, width) {
   return ' '.repeat(Math.max(width - value.length, 0)) + value;
+};
+
+/**
+ * Default format for numbers
+ *
+ * @param {Number} str
+ * @returns {String}
+ */
+exports.num = function(str) {
+  return chalk.blue.bold(str);
 };

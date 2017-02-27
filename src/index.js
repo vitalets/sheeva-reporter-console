@@ -74,10 +74,6 @@ module.exports = class ProgressReporter {
         }
         break;
       }
-      // case 'SUITE_SPLIT': {
-      //   this._collector.suiteSplit(data);
-      //   break;
-      // }
       case 'HOOK_END': {
         this._collector.hookEnd(data);
         break;

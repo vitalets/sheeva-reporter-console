@@ -50,7 +50,7 @@ module.exports = class Printer {
         : (tests.success ? chalk.green(`SUCCESS`) : '');
       line += `${action} ${counts} ${status}`;
     } else {
-      line += chalk.gray(`planned`);
+      line += chalk.gray(`pending`);
     }
     this._cursor.write(index, line);
   }
@@ -90,7 +90,6 @@ module.exports = class Printer {
     const {duration, errorsData} = this._collector.runnerStat;
     console.log(chalk.bold[errorsData.size ? 'red' : 'green'](`Errors: ${errorsData.size}`));
     console.log(`Total time: ${chalk.cyan(duration)} ms`);
-    console.log(`Splits: ${this._collector.splits.length}`);
     console.log(`Done.`);
   }
 

@@ -8,7 +8,6 @@ module.exports = class Collector {
     this._sessions = new Map();
     this._runningSessions = new Set();
     this._runnerStat = {};
-    this._splits = [];
     this._config = null;
   }
 
@@ -26,10 +25,6 @@ module.exports = class Collector {
 
   get sessions() {
     return this._sessions;
-  }
-
-  get splits() {
-    return this._splits;
   }
 
   get config() {
@@ -91,10 +86,6 @@ module.exports = class Collector {
     const sessionStat = this.getSessionStat(data);
     sessionStat.files++;
     this._storeErrorData(data);
-  }
-
-  suiteSplit(data) {
-    this._splits.push(data.suite.name);
   }
 
   hookEnd(data) {

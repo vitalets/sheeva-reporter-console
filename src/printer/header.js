@@ -3,7 +3,7 @@
  */
 
 const chalk = require('chalk');
-const {pluralize, num} = require('./utils');
+const {pluralize, num, numReq} = require('./utils');
 
 module.exports = class Header {
   constructor(runnerStat) {
@@ -18,8 +18,8 @@ module.exports = class Header {
 
   _printFilesEnvsAndConcurrency() {
     const {files, config} = this._runnerStat;
-    const strFiles = `${num(files.length)} ${pluralize('file', files.length)}`;
-    const strEnvs = `${num(config.envs.length)} ${pluralize('env', config.envs.length)}`;
+    const strFiles = `${numReq(files.length)} ${pluralize('file', files.length)}`;
+    const strEnvs = `${numReq(config.envs.length)} ${pluralize('env', config.envs.length)}`;
     const strConcurrency = `concurrency ${num(config.concurrency)}`;
     console.log(`Sheeva started`);
     console.log(`Running ${strFiles} on ${strEnvs} with ${strConcurrency}`);

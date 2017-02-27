@@ -27,12 +27,23 @@ exports.leftPad = function(value, width) {
 };
 
 /**
- * Default format for numbers
+ * Format number
  *
  * @param {Number} value
  * @returns {String}
  */
 exports.num = function(value) {
+  const color = value === 0 ? 'red' : 'blue';
+  return chalk.bold.blue(value);
+};
+
+/**
+ * Format required number, uses RED for zero values
+ *
+ * @param {Number} value
+ * @returns {String}
+ */
+exports.numReq = function(value) {
   const color = value === 0 ? 'red' : 'blue';
   return chalk.bold[color](value);
 };

@@ -7,6 +7,7 @@ const path = require('path');
 const {pluralize, leftPad, num} = require('./utils');
 const StickyCursor = require('./sticky-cursor');
 const EndedSlots = require('./ended-slots');
+const Header = require('./header');
 
 const COLORS = ['green', 'yellow', 'blue', 'white'];
 
@@ -22,28 +23,13 @@ module.exports = class Printer {
   }
 
   unstickCursor() {
-    this._cursor.clear();
+    if (this._cursor) {
+      this._cursor.clear();
+    }
   }
 
   printHeader() {
-    const {files, config, onlyFiles, skippedSuites, skippedTests, skippedInFiles} = this._collector.runnerStat;
-    console.log(`Sheeva started`);
-    console.log(`Environments: ${num(config.envs.length)}, concurrency: ${num(config.concurrency)}`);
-    const strFiles = `Files: ${num(files.length)}`;
-    console.log(files.length ? strFiles : chalk.red(strFiles));
-    if (onlyFiles.length) {
-      const filesStr = `${num(onlyFiles.length)} (${chalk.gray(onlyFiles.join(', '))})`;
-      console.log(`Files with ${chalk.bold.yellow('ONLY')}: ${filesStr}`);
-    }
-    if (skippedInFiles.length) {
-      // const suites = skippedSuites.length ? `${num(skippedSuites.length)} suite(s)` : '';
-      // const tests = skippedTests.length ? `${num(skippedTests.length)} test(s)` : '';
-      // const and = suites && tests ? ' and ' : '';
-      const filesStr = `${num(skippedInFiles.length)} (${chalk.gray(skippedInFiles.join(', '))})`;
-      console.log(`Files with ${chalk.bold.yellow('SKIP')}: ${filesStr}`);
-    }
-
-
+    new Header(this._collector.runnerStat).print();
   }
 
   printEnvs() {

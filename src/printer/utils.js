@@ -29,9 +29,10 @@ exports.leftPad = function(value, width) {
 /**
  * Default format for numbers
  *
- * @param {Number} str
+ * @param {Number} value
  * @returns {String}
  */
-exports.num = function(str) {
-  return chalk.blue.bold(str);
+exports.num = function(value) {
+  const color = value === 0 ? 'red' : 'blue';
+  return chalk.bold[color](value);
 };

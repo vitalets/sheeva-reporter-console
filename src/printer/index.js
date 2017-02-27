@@ -44,7 +44,7 @@ module.exports = class Printer {
     let line = `${chalk[barColor]('▇')} ${chalk.bold(label)}: `;
     if (started) {
       const action = ended ? `done` : `executed`;
-      const counts = `${num(tests.ended)} of ${num(tests.total)} test(s)`;
+      const counts = `${num(tests.ended)} of ${num(tests.total)} ${pluralize('test', tests.total)}`;
       const status = tests.failed
         ? chalk.red(`${tests.failed} FAILED`)
         : (tests.success ? chalk.green(`SUCCESS`) : '');
@@ -62,8 +62,9 @@ module.exports = class Printer {
 
       // if reached end of screen...
       if (row === process.stdout.rows - 2 && this._collector.runningSessions.size - index > 1) {
-        const invisibleSessions = this._collector.runningSessions.size - index;
-        this._cursor.write(row, `and ${chalk.magenta(invisibleSessions)} slot(s) more...`);
+        const invisibleSlots = this._collector.runningSessions.size - index;
+        const invisibleSlotsStr = `and ${chalk.magenta(invisibleSlots)} ${pluralize('slot', invisibleSlots)} more...`;
+        this._cursor.write(row, invisibleSlotsStr);
         return;
       }
 

@@ -7,15 +7,14 @@ const {pluralize, leftPad} = require('./utils');
 
 const MAX_BAR_WIDTH = 60;
 const LABELS_WIDTH = 50;
-const COLORS = ['green', 'yellow', 'blue', 'white'];
 
 module.exports = class EndedSlots {
-  constructor(sessionStats) {
+  constructor(sessionStats, envColors) {
     this._sessionStats = sessionStats;
     this._slotTotals = new Map();
     this._maxDuration = 0;
     this._maxBarWidth = Math.min(MAX_BAR_WIDTH, process.stdout.columns - LABELS_WIDTH);
-    this._envColors = new Map();
+    this._envColors = envColors;
   }
 
   print() {
@@ -78,19 +77,10 @@ module.exports = class EndedSlots {
   _getBarString(envBarWidths) {
     let str = '';
     envBarWidths.forEach((barWidth, env) => {
-      const color = this._getEnvColor(env);
+      const color = this._envColors.get(env);
       str += chalk[color]('▇'.repeat(barWidth));
     });
     return str;
-  }
-
-  _getEnvColor(env) {
-    let color = this._envColors.get(env);
-    if (!color) {
-      color = COLORS[this._envColors.size % COLORS.length];
-      this._envColors.set(env, color);
-    }
-    return color;
   }
 
   _getSlotLabel(index) {

@@ -8,10 +8,13 @@ const {pluralize, leftPad, num} = require('./utils');
 const StickyCursor = require('./sticky-cursor');
 const EndedSlots = require('./ended-slots');
 
+const COLORS = ['green', 'yellow', 'blue', 'white'];
+
 module.exports = class Printer {
   constructor(collector) {
     this._collector = collector;
     this._cursor = null;
+    this._envColors = new Map();
   }
 
   stickCursor() {
@@ -51,7 +54,8 @@ module.exports = class Printer {
 
   printEnvLine(data) {
     const {label, tests, index, started, ended} = this._collector.getEnvStat(data);
-    let line = `${chalk.bold(label)}: `;
+    const barColor = this._getEnvColor(data.env);
+    let line = `${chalk[barColor]('▇')} ${chalk.bold(label)}: `;
     if (started) {
       const action = ended ? `done` : `executed`;
       const counts = `${num(tests.ended)} of ${num(tests.total)} test(s)`;
@@ -92,7 +96,7 @@ module.exports = class Printer {
   }
 
   printSlotBars() {
-    new EndedSlots(this._collector.sessions).print();
+    new EndedSlots(this._collector.sessions, this._envColors).print();
   }
 
   printFooter() {
@@ -135,6 +139,15 @@ module.exports = class Printer {
     const maxIndexWidth = String(this._collector.config.concurrency).length;
     const indexStr = leftPad(index, maxIndexWidth);
     return chalk.magenta(`Slot #${indexStr}: `);
+  }
+
+  _getEnvColor(env) {
+    let color = this._envColors.get(env);
+    if (!color) {
+      color = COLORS[this._envColors.size % COLORS.length];
+      this._envColors.set(env, color);
+    }
+    return color;
   }
 };
 

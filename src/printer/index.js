@@ -58,8 +58,12 @@ module.exports = class Printer {
     this._cursor.write(index, line);
   }
 
-  printRunningSlots(data) {
-    this._runningSlots.print(data);
+  printRunningSlots() {
+    this._runningSlots.printAll();
+  }
+
+  printRunningSlot(index) {
+    this._runningSlots.printByIndex(index);
   }
 
   printSlotBars() {

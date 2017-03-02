@@ -16,32 +16,27 @@ module.exports = class RunningSlots {
     this._cursor = cursor;
   }
 
-  print(data) {
-    let index = 0;
-    for (let session of this._collector.runningSessions.values()) {
-      const row = this._collector.envStats.size + index;
+  printByIndex(index) {
+    const row = this._getRowByIndex(index);
+    const session = this._collector.runningSlots[index];
+    if (session && !this._isOutOfScreen(row)) {
+      this._printLine(row, session);
+    }
+  }
 
-      // if reached end of screen...
-      if (row === process.stdout.rows - 2 && this._collector.runningSessions.size - index > 1) {
-        const invisibleSlots = this._collector.runningSessions.size - index;
-        const invisibleSlotsStr = `and ${chalk.magenta(invisibleSlots)} ${pluralize('slot', invisibleSlots)} more...`;
-        this._cursor.write(row, invisibleSlotsStr);
+  printAll() {
+    const nonEmptyCount = this._getNonEmptySlotsCount();
+    let printedCount = 0;
+    for (let index = 0; index < this._collector.runningSlots.length; index++) {
+      const row = this._getRowByIndex(index);
+      const invisibleSlotsCount = nonEmptyCount - printedCount;
+      if (this._isOutOfScreen(row) && invisibleSlotsCount > 1) {
+        this._printOutOfScreen(invisibleSlotsCount);
         return;
       }
-
-      // if data not passed - session was removed (see SESSION_END), so re-print each line
-      // if data.session equls to current session in for, also print that session
-      if (!data || data.session === session) {
-        this._printLine(row, session);
-      }
-      index++;
+      this.printByIndex(index);
     }
-
-    // if data not passed - session was removed, so cut max row
-    if (!data) {
-      const usedRows = this._collector.envStats.size + this._collector.runningSessions.size;
-      this._cursor.cut(usedRows);
-    }
+    this._cutMaxRow(nonEmptyCount);
   }
 
   _printLine(row, session) {
@@ -56,9 +51,32 @@ module.exports = class RunningSlots {
     this._cursor.write(row, line);
   }
 
+  _printOutOfScreen(invisibleSlotsCount) {
+    const row = process.stdout.rows - 2;
+    const footer = `and ${chalk.magenta(invisibleSlotsCount)} ${pluralize('slot', invisibleSlotsCount)} more...`;
+    this._cursor.write(row, footer);
+  }
+
   _getSlotLabel(index) {
     const maxIndexWidth = String(this._collector.config.concurrency).length;
     const indexStr = leftPad(index, maxIndexWidth);
     return chalk.magenta(`Slot #${indexStr}: `);
+  }
+
+  _getNonEmptySlotsCount() {
+    return this._collector.runningSlots.filter(Boolean).length;
+  }
+
+  _isOutOfScreen(row) {
+    return row >= process.stdout.rows - 2;
+  }
+
+  _getRowByIndex(index) {
+    return this._collector.envStats.size + index;
+  }
+
+  _cutMaxRow(nonEmptyCount) {
+    const usedRows = this._collector.envStats.size + nonEmptyCount;
+    this._cursor.cut(usedRows);
   }
 };

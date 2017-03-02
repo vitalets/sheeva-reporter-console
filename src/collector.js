@@ -6,7 +6,7 @@ module.exports = class Collector {
   constructor() {
     this._envStats = new Map();
     this._sessions = new Map();
-    this._runningSessions = new Set();
+    this._runningSlots = [];
     this._runnerStat = {};
     this._config = null;
   }
@@ -19,8 +19,8 @@ module.exports = class Collector {
     return this._envStats;
   }
 
-  get runningSessions() {
-    return this._runningSessions;
+  get runningSlots() {
+    return this._runningSlots;
   }
 
   get sessions() {
@@ -55,7 +55,7 @@ module.exports = class Collector {
   sessionStart(data) {
     const sessionStat = this._createSessionStat(data.session);
     sessionStat.start = data.timestamp;
-    this._runningSessions.add(data.session);
+    this._runningSlots[data.session.slotIndex] = data.session;
   }
 
   sessionStarted(data) {
@@ -73,7 +73,7 @@ module.exports = class Collector {
     const sessionStat = this.getSessionStat(data);
     sessionStat.end = data.timestamp;
     sessionStat.duration = sessionStat.end - sessionStat.start;
-    this._runningSessions.delete(data.session);
+    this._runningSlots[data.session.slotIndex] = undefined;
     this._storeErrorData(data);
   }
 

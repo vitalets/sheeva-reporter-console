@@ -26,17 +26,17 @@ module.exports = class Header {
   }
 
   _printOnly() {
-    const {onlyFiles} = this._runnerStat;
-    if (onlyFiles.length) {
-      const filesStr = `${num(onlyFiles.length)} (${chalk.gray(onlyFiles.join(', '))})`;
+    const {only} = this._runnerStat;
+    if (only.files.length) {
+      const filesStr = `${num(only.files.length)} (${chalk.gray(only.files.join(', '))})`;
       console.log(`Files with ${chalk.bold.yellow('ONLY')}: ${filesStr}`);
     }
   }
 
   _printSkip() {
-    const {skippedInFiles} = this._runnerStat;
-    if (skippedInFiles.length) {
-      const filesStr = `${num(skippedInFiles.length)} (${chalk.gray(skippedInFiles.join(', '))})`;
+    const {skip} = this._runnerStat;
+    if (skip.files.length) {
+      const filesStr = `${num(skip.files.length)} (${chalk.gray(skip.files.join(', '))})`;
       console.log(`Files with ${chalk.bold.yellow('SKIP')}: ${filesStr}`);
     }
   }

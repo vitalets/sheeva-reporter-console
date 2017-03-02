@@ -132,14 +132,12 @@ module.exports = class Collector {
   }
 
   _createRunnerStat(data) {
-    const {files, config, timestamp, onlyFiles, skippedSuites, skippedTests, skippedInFiles} = data;
+    const {files, config, timestamp, only, skip} = data;
     Object.assign(this._runnerStat, {
       config,
       files,
-      onlyFiles,
-      skippedSuites,
-      skippedTests,
-      skippedInFiles,
+      only,
+      skip,
       startTime: timestamp,
       duration: 0,
       errorsData: new Map(),

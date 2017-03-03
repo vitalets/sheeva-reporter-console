@@ -5,7 +5,7 @@
 const chalk = require('chalk');
 const {pluralize, rightPad} = require('./utils');
 
-const MAX_BAR_WIDTH = 60;
+const MAX_BAR_WIDTH = 70;
 const LABELS_WIDTH = 50;
 
 module.exports = class EndedSlots {
@@ -44,12 +44,19 @@ module.exports = class EndedSlots {
     });
   }
 
+  /**
+   * For last env in each slot calc bar width as difference between totals.barWidth and summarized widths
+   * to smooth rounding artefacts
+   */
   _calcBarWidths() {
     this._slotTotals.forEach(totals => {
+      totals.barWidth = this._calcBarWidth(totals.duration);
+      let sumBarWidth = 0;
       totals.envDurations.forEach((envDuration, env) => {
-        const barWidth = this._calcBarWidth(envDuration);
-        totals.envBarWidths.set(env, barWidth);
-        totals.barWidth += barWidth;
+        const isLast = totals.envBarWidths.size === totals.envDurations.size - 1;
+        const envBarWidth = isLast ? totals.barWidth - sumBarWidth : this._calcBarWidth(envDuration);
+        totals.envBarWidths.set(env, envBarWidth);
+        sumBarWidth += envBarWidth;
       });
     });
   }

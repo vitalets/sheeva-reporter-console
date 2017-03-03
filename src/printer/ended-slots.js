@@ -3,7 +3,7 @@
  */
 
 const chalk = require('chalk');
-const {pluralize, leftPad} = require('./utils');
+const {pluralize, rightPad} = require('./utils');
 
 const MAX_BAR_WIDTH = 60;
 const LABELS_WIDTH = 50;
@@ -85,7 +85,7 @@ module.exports = class EndedSlots {
 
   _getSlotLabel(index) {
     const maxIndexWidth = String(this._slotTotals.size).length;
-    const indexStr = leftPad(index, maxIndexWidth);
+    const indexStr = rightPad(index, maxIndexWidth);
     return chalk.magenta(`Slot #${indexStr}: `);
   }
 };

@@ -4,7 +4,7 @@
 
 const chalk = require('chalk');
 const path = require('path');
-const {pluralize, leftPad, num} = require('./utils');
+const {pluralize, rightPad, num} = require('./utils');
 const StickyCursor = require('./sticky-cursor');
 const EndedSlots = require('./ended-slots');
 const RunningSlots = require('./running-slots');
@@ -62,8 +62,8 @@ module.exports = class Printer {
     this._runningSlots.printAll();
   }
 
-  printRunningSlot(index) {
-    this._runningSlots.printByIndex(index);
+  printRunningSlot(data) {
+    this._runningSlots.printByIndex(data.session.slotIndex);
   }
 
   printSlotBars() {

@@ -22,8 +22,9 @@ exports.pluralize = function(word, count) {
  * @param {Number} width
  * @returns {String}
  */
-exports.leftPad = function(value, width) {
-  return ' '.repeat(Math.max(width - value.length, 0)) + value;
+exports.rightPad = function(value, width) {
+  value = String(value);
+  return value + ' '.repeat(Math.max(width - value.length, 0));
 };
 
 /**
@@ -33,7 +34,6 @@ exports.leftPad = function(value, width) {
  * @returns {String}
  */
 exports.num = function(value) {
-  const color = value === 0 ? 'red' : 'blue';
   return chalk.bold.blue(value);
 };
 

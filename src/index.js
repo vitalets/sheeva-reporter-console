@@ -40,37 +40,50 @@ module.exports = class ProgressReporter {
         this._printer.printEnvLine(data);
         break;
       }
+
+      case 'SLOT_ADD': {
+        this._collector.slotAdd(data);
+        this._printer.printRunningSlots();
+        break;
+      }
+
+      case 'SLOT_DELETE': {
+        this._collector.slotDelete(data);
+        this._printer.printRunningSlots();
+        break;
+      }
+
       case 'SESSION_START': {
         this._collector.sessionStart(data);
-        this._printer.printRunningSlots();
+        this._printer.printRunningSlot(data);
         break;
       }
       case 'SESSION_STARTED': {
         this._collector.sessionStarted(data);
-        this._printer.printRunningSlots(data.session.slotIndex);
+        this._printer.printRunningSlot(data);
         break;
       }
       case 'SESSION_ENDING': {
         this._collector.sessionEnding(data);
-        this._printer.printRunningSlot(data.session.slotIndex);
+        this._printer.printRunningSlot(data);
         break;
       }
       case 'SESSION_END': {
         this._collector.sessionEnd(data);
-        this._printer.printRunningSlots();
+        this._printer.printRunningSlot(data);
         break;
       }
       case 'SUITE_START': {
         if (!data.suite.parent) {
           this._collector.topSuiteStart(data);
-          this._printer.printRunningSlot(data.session.slotIndex);
+          this._printer.printRunningSlot(data);
         }
         break;
       }
       case 'SUITE_END': {
         if (!data.suite.parent) {
           this._collector.topSuiteEnd(data);
-          this._printer.printRunningSlot(data.session.slotIndex);
+          this._printer.printRunningSlot(data);
         }
         break;
       }

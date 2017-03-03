@@ -14,6 +14,15 @@ module.exports = class StickyCursor {
     this._maxRow = 0;
   }
 
+  /**
+   * Last screen row. Reserve place for cursor also.
+   *
+   * @returns {Number}
+   */
+  get lastScreenRow() {
+    return process.stdout.rows - 2;
+  }
+
   write(row, str) {
     if (row < this._maxRow) {
       this._writeUp(row, str);
@@ -31,10 +40,6 @@ module.exports = class StickyCursor {
       process.stdout.write(ae.eraseLines(this._maxRow - row + 1));
       this._maxRow = row;
     }
-  }
-
-  isOutOfScreen(row) {
-    return row >= process.stdout.rows - 1;
   }
 
   _writeDown(row, str) {

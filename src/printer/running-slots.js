@@ -4,79 +4,99 @@
 
 const path = require('path');
 const chalk = require('chalk');
-const {pluralize, leftPad, num} = require('./utils');
+const {pluralize, rightPad} = require('./utils');
 
 module.exports = class RunningSlots {
   constructor(collector) {
     this._collector = collector;
     this._cursor = null;
+    this._printedRows = 0;
+    this._maxPrintedSlotIndex = 0;
   }
 
   setCursor(cursor) {
     this._cursor = cursor;
   }
 
-  printByIndex(index) {
-    const row = this._getRowByIndex(index);
-    const session = this._collector.runningSlots[index];
-    if (session && !this._isOutOfScreen(row)) {
-      this._printLine(row, session);
+  printByIndex(slotIndex) {
+    if (slotIndex <= this._maxPrintedSlotIndex) {
+      const row = this._getRowBySlotIndex(slotIndex);
+      this._printRow(row, slotIndex);
     }
   }
 
   printAll() {
-    const nonEmptyCount = this._getNonEmptySlotsCount();
-    let printedCount = 0;
-    for (let index = 0; index < this._collector.runningSlots.length; index++) {
-      const row = this._getRowByIndex(index);
-      const invisibleSlotsCount = nonEmptyCount - printedCount;
-      if (this._isOutOfScreen(row) && invisibleSlotsCount > 1) {
-        this._printOutOfScreen(invisibleSlotsCount);
-        return;
+    this._printedRows = 0;
+    this._maxPrintedSlotIndex = 0;
+    for (let slotIndex of this._collector.slots.keys()) {
+      const row = this._getRowBySlotIndex(slotIndex);
+      if (row < this._cursor.lastScreenRow) {
+        this._printRow(row, slotIndex);
+        this._printedRows++;
+      } else if (row === this._cursor.lastScreenRow) {
+        this._printLastRow(row, slotIndex);
+        this._printedRows++;
+        break;
       }
-      this.printByIndex(index);
     }
-    this._cutMaxRow(nonEmptyCount);
+
+    this._cutMaxRow();
   }
 
-  _printLine(row, session) {
-    const {currentFile, ending} = this._collector.getSessionStat({session});
-    let line = this._getSlotLabel(session.slotIndex + 1);
-    if (currentFile) {
-      const filename = path.basename(currentFile);
-      line += `${filename}`;
+  _printRow(row, slotIndex) {
+    let line = this._getSlotLabel(slotIndex + 1);
+    const session = this._collector.slots.get(slotIndex);
+    if (session) {
+      line += this._getSessionStatus(session);
     } else {
-      line += ending ? `ending...` : `starting...`;
+      line += chalk.gray('free');
     }
+    this._updateMaxPrintedSlotIndex(slotIndex);
     this._cursor.write(row, line);
   }
 
-  _printOutOfScreen(invisibleSlotsCount) {
-    const row = process.stdout.rows - 2;
-    const footer = `and ${chalk.magenta(invisibleSlotsCount)} ${pluralize('slot', invisibleSlotsCount)} more...`;
-    this._cursor.write(row, footer);
+  _printLastRow(row, slotIndex) {
+    const invisibleSlotsCount = this._collector.slots.size - this._printedRows;
+    if (invisibleSlotsCount > 1) {
+      this._printOutOfScreenSummary(invisibleSlotsCount);
+    } else {
+      this._printRow(row, slotIndex);
+    }
+  }
+
+  _printOutOfScreenSummary(invisibleSlotsCount) {
+    const summary = `and ${chalk.magenta(invisibleSlotsCount)} ${pluralize('slot', invisibleSlotsCount)} more...`;
+    this._cursor.write(this._cursor.lastScreenRow, summary);
   }
 
   _getSlotLabel(index) {
     const maxIndexWidth = String(this._collector.config.concurrency).length;
-    const indexStr = leftPad(index, maxIndexWidth);
+    const indexStr = rightPad(index, maxIndexWidth);
     return chalk.magenta(`Slot #${indexStr}: `);
   }
 
-  _getNonEmptySlotsCount() {
-    return this._collector.runningSlots.filter(Boolean).length;
+  _getSessionStatus(session) {
+    const {currentFile, ending} = this._collector.getSessionStat({session});
+    if (currentFile) {
+      const filename = path.basename(currentFile);
+      return `${filename}`;
+    } else {
+      return ending ? `ending session...` : `starting session...`;
+    }
   }
 
-  _isOutOfScreen(row) {
-    return row >= process.stdout.rows - 2;
-  }
-
-  _getRowByIndex(index) {
+  _getRowBySlotIndex(index) {
     return this._collector.envStats.size + index;
   }
 
-  _cutMaxRow(nonEmptyCount) {
-    const usedRows = this._collector.envStats.size + nonEmptyCount;
+  _cutMaxRow() {
+    const usedRows = this._collector.envStats.size + this._printedRows;
     this._cursor.cut(usedRows);
+  }
+
+  _updateMaxPrintedSlotIndex(slotIndex) {
+    if (slotIndex > this._maxPrintedSlotIndex) {
+      this._maxPrintedSlotIndex = slotIndex;
+    }
   }
 };

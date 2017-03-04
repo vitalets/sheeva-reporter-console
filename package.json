@@ -1,7 +1,7 @@
 {
-  "name": "sheeva-reporter-progress",
+  "name": "sheeva-reporter-timeline",
   "version": "0.1.0",
-  "description": "Progress reporter for Sheeva test runner",
+  "description": "Timeline reporter for Sheeva test runner",
   "author": {
     "name": "Vitaliy Potapov",
     "email": "noginsk@rambler.ru"

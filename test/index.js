@@ -1,12 +1,11 @@
 /**
  * Only smoke tests now
- * todo: add more
+ * todo: add more tests
  */
 
-const utils = require('../src/printer/utils');
-const ProgressReporter = require('../src');
+const TimelineReporter = require('../src');
 
-const reporter = new ProgressReporter();
+const reporter = new TimelineReporter();
 // todo: reporter.handleEvent('RUNNER_START', {});
 
 console.log('ok');

@@ -5,7 +5,7 @@
 const Collector = require('./collector');
 const Printer = require('./printer');
 
-module.exports = class ProgressReporter {
+module.exports = class TimelineReporter {
   constructor() {
     this._collector = new Collector();
     this._printer = new Printer(this._collector);

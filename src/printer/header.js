@@ -21,7 +21,7 @@ module.exports = class Header {
     const strFiles = `${numReq(files.length)} ${pluralize('file', files.length)}`;
     const strEnvs = `${numReq(config.envs.length)} ${pluralize('env', config.envs.length)}`;
     const strConcurrency = `concurrency ${num(config.concurrency)}`;
-    console.log(`Sheeva started`);
+    console.log(`Sheeva started.`);
     console.log(`Running ${strFiles} on ${strEnvs} with ${strConcurrency}`);
   }
 

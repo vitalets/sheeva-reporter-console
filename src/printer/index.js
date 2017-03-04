@@ -9,6 +9,7 @@ const StickyCursor = require('./sticky-cursor');
 const EndedSlots = require('./ended-slots');
 const RunningSlots = require('./running-slots');
 const Header = require('./header');
+const ErrorPrinter = require('./error');
 
 const COLORS = ['green', 'yellow', 'blue', 'white'];
 
@@ -72,6 +73,7 @@ module.exports = class Printer {
 
   printFooter() {
     const {duration, errorsData} = this._collector.runnerStat;
+    console.log(chalk.underline(`SUMMARY:`));
     console.log(chalk.bold[errorsData.size ? 'red' : 'green'](`Errors: ${errorsData.size}`));
     console.log(`Total time: ${chalk.cyan(duration)} ms`);
     console.log(`Done.`);
@@ -79,18 +81,8 @@ module.exports = class Printer {
 
   printErrors() {
     const {errorsData} = this._collector.runnerStat;
-    errorsData.forEach(data => this.printError(data));
-  }
-
-  printError(data) {
-    if (isAssertionError(data.error)) {
-      console.log(formatAssertionError(data));
-      if (data.error.originalError) {
-        console.error(data.error.originalError);
-      }
-    } else {
-      console.error(data.error);
-    }
+    let index = 0;
+    errorsData.forEach(data => new ErrorPrinter(++index, data).print());
   }
 
   _getEnvColor(env) {
@@ -102,17 +94,3 @@ module.exports = class Printer {
     return color;
   }
 };
-
-// todo: more universal way to detect assertion error?
-function isAssertionError(error) {
-  return error.name === 'AssertionError' || error.name === 'UnexpectedError'
-}
-
-function formatAssertionError({error, test}) {
-  return []
-    .concat(test.parents.map(suite => suite.name))
-    .concat([test.name])
-    .map((item, i) => ' '.repeat(i * 2) + item)
-    .concat([error.message])
-    .join('\n');
-}

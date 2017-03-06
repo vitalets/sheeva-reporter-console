@@ -1,5 +1,5 @@
 /**
- * Reporter that just put events into log
+ * Entry point for events
  */
 
 const Collector = require('./collector');
@@ -24,7 +24,7 @@ module.exports = class TimelineReporter {
         this._printer.unstickCursor();
         this._printer.printEnvs();
         if (!data.error) {
-          this._printer.printSlotBars();
+          this._printer.printTimeline();
         }
         this._printer.printErrors();
         this._printer.printFooter();
@@ -41,49 +41,49 @@ module.exports = class TimelineReporter {
         break;
       }
 
-      case 'SLOT_ADD': {
-        this._collector.slotAdd(data);
-        this._printer.printRunningSlots();
+      case 'WORKER_ADD': {
+        this._collector.workerAdd(data);
+        this._printer.printWorkers();
         break;
       }
 
-      case 'SLOT_DELETE': {
-        this._collector.slotDelete(data);
-        this._printer.printRunningSlots();
+      case 'WORKER_DELETE': {
+        this._collector.workerDelete(data);
+        this._printer.printWorkers();
         break;
       }
 
       case 'SESSION_START': {
         this._collector.sessionStart(data);
-        this._printer.printRunningSlot(data);
+        this._printer.printWorker(data);
         break;
       }
       case 'SESSION_STARTED': {
         this._collector.sessionStarted(data);
-        this._printer.printRunningSlot(data);
+        this._printer.printWorker(data);
         break;
       }
       case 'SESSION_ENDING': {
         this._collector.sessionEnding(data);
-        this._printer.printRunningSlot(data);
+        this._printer.printWorker(data);
         break;
       }
       case 'SESSION_END': {
         this._collector.sessionEnd(data);
-        this._printer.printRunningSlot(data);
+        this._printer.printWorker(data);
         break;
       }
       case 'SUITE_START': {
         if (!data.suite.parent) {
           this._collector.topSuiteStart(data);
-          this._printer.printRunningSlot(data);
+          this._printer.printWorker(data);
         }
         break;
       }
       case 'SUITE_END': {
         if (!data.suite.parent) {
           this._collector.topSuiteEnd(data);
-          this._printer.printRunningSlot(data);
+          this._printer.printWorker(data);
         }
         break;
       }

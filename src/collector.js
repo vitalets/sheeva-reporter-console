@@ -6,7 +6,7 @@ module.exports = class Collector {
   constructor() {
     this._envStats = new Map();
     this._sessions = new Map();
-    this._slots = new Map();
+    this._workers = new Map();
     this._runnerStat = {};
     this._config = null;
   }
@@ -19,8 +19,8 @@ module.exports = class Collector {
     return this._envStats;
   }
 
-  get slots() {
-    return this._slots;
+  get workers() {
+    return this._workers;
   }
 
   get sessions() {
@@ -52,18 +52,18 @@ module.exports = class Collector {
     envStat.ended = true;
   }
 
-  slotAdd(data) {
-    this._slots.set(data.slot.index, null);
+  workerAdd(data) {
+    this._workers.set(data.worker.index, null);
   }
 
-  slotDelete(data) {
-    this._slots.delete(data.slot.index);
+  workerDelete(data) {
+    this._workers.delete(data.worker.index);
   }
 
   sessionStart(data) {
     const sessionStat = this._createSessionStat(data.session);
     sessionStat.start = data.timestamp;
-    this._slots.set(data.session.slotIndex, data.session);
+    this._workers.set(data.session.workerIndex, data.session);
   }
 
   sessionStarted(data) {
@@ -81,7 +81,7 @@ module.exports = class Collector {
     const sessionStat = this.getSessionStat(data);
     sessionStat.end = data.timestamp;
     sessionStat.duration = sessionStat.end - sessionStat.start;
-    this._slots.set(data.session.slotIndex, null);
+    this._workers.set(data.session.workerIndex, null);
     this._storeErrorData(data);
   }
 

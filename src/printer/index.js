@@ -6,8 +6,8 @@ const chalk = require('chalk');
 const path = require('path');
 const {pluralize, rightPad, num} = require('./utils');
 const StickyCursor = require('./sticky-cursor');
-const EndedSlots = require('./ended-slots');
-const RunningSlots = require('./running-slots');
+const Timeline = require('./timeline');
+const Workers = require('./workers');
 const Header = require('./header');
 const ErrorPrinter = require('./error');
 
@@ -17,13 +17,13 @@ module.exports = class Printer {
   constructor(collector) {
     this._collector = collector;
     this._cursor = null;
-    this._runningSlots = new RunningSlots(this._collector);
+    this._workers = new Workers(this._collector);
     this._envColors = new Map();
   }
 
   stickCursor() {
     this._cursor = new StickyCursor();
-    this._runningSlots.setCursor(this._cursor);
+    this._workers.setCursor(this._cursor);
   }
 
   unstickCursor() {
@@ -59,16 +59,16 @@ module.exports = class Printer {
     this._cursor.write(index, line);
   }
 
-  printRunningSlots() {
-    this._runningSlots.printAll();
+  printWorkers() {
+    this._workers.printAll();
   }
 
-  printRunningSlot(data) {
-    this._runningSlots.printByIndex(data.session.slotIndex);
+  printWorker(data) {
+    this._workers.printByIndex(data.session.workerIndex);
   }
 
-  printSlotBars() {
-    new EndedSlots(this._collector.sessions, this._envColors).print();
+  printTimeline() {
+    new Timeline(this._collector.sessions, this._envColors).print();
   }
 
   printFooter() {

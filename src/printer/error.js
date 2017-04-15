@@ -18,6 +18,7 @@ module.exports = class ErrorPrinter {
       this._printFile();
       this._printSuiteTree();
       this._printErrorMessage();
+      this._printOriginalError();
     } else {
       console.error(this._error);
     }
@@ -43,7 +44,7 @@ module.exports = class ErrorPrinter {
     const suites = test.parents.slice(1);
     const str = []
       .concat(suites.map(suite => chalk.gray(suite.name)))
-      .concat([chalk.red(test.name)])
+      .concat([test.name])
       .map((item, i) => ' '.repeat(i * 2) + item)
       .join('\n');
     console.log(str);
@@ -52,6 +53,13 @@ module.exports = class ErrorPrinter {
   _printErrorMessage() {
     console.log(this._error.message);
   }
+
+  _printOriginalError() {
+    if (this._error.originalError) {
+      console.error(this._error.originalError);
+    }
+  }
+
 
   // todo: more universal way to detect assertion error?
   _isAssertionError() {

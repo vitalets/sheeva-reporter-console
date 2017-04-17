@@ -6,8 +6,8 @@ const chalk = require('chalk');
 const {pluralize, num, numReq} = require('./utils');
 
 module.exports = class Header {
-  constructor(runnerStat) {
-    this._runnerStat = runnerStat;
+  constructor(result) {
+    this._result = result;
   }
 
   print() {
@@ -17,8 +17,8 @@ module.exports = class Header {
   }
 
   _printFilesEnvsAndConcurrency() {
-    const {files, config} = this._runnerStat;
-    const strFiles = `${numReq(files.length)} ${pluralize('file', files.length)}`;
+    const {processedFiles, config} = this._result;
+    const strFiles = `${numReq(processedFiles.size)} ${pluralize('file', processedFiles.size)}`;
     const strEnvs = `${numReq(config.envs.length)} ${pluralize('env', config.envs.length)}`;
     const strConcurrency = `concurrency ${num(config.concurrency)}`;
     console.log(`Sheeva started.`);
@@ -26,17 +26,17 @@ module.exports = class Header {
   }
 
   _printOnly() {
-    const {only} = this._runnerStat;
-    if (only.files.length) {
-      const filesStr = `${num(only.files.length)} (${chalk.gray(only.files.join(', '))})`;
+    const files = this._result.only.files.toArray();
+    if (files.length) {
+      const filesStr = `${num(files.length)} (${chalk.gray(files.join(', '))})`;
       console.log(`Files with ${chalk.bold.yellow('ONLY')}: ${filesStr}`);
     }
   }
 
   _printSkip() {
-    const {skip} = this._runnerStat;
-    if (skip.files.length) {
-      const filesStr = `${num(skip.files.length)} (${chalk.gray(skip.files.join(', '))})`;
+    const files = this._result.skip.files.toArray();
+    if (files.length) {
+      const filesStr = `${num(files.length)} (${chalk.gray(files.join(', '))})`;
       console.log(`Files with ${chalk.bold.yellow('SKIP')}: ${filesStr}`);
     }
   }

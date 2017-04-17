@@ -3,36 +3,36 @@
  */
 
 const chalk = require('chalk');
-const {pluralize, rightPad} = require('./utils');
+const {pluralize, rightPad, getEnvColor} = require('./utils');
 
 const MAX_BAR_WIDTH = 70;
 const LABELS_WIDTH = 50;
 
 module.exports = class Timeline {
-  constructor(sessionStats, envColors) {
-    this._sessionStats = sessionStats;
+  constructor(result) {
+    this._result = result;
     this._workerTotals = new Map();
     this._maxDuration = 0;
     this._maxBarWidth = Math.min(MAX_BAR_WIDTH, process.stdout.columns - LABELS_WIDTH);
-    this._envColors = envColors;
   }
 
   print() {
-    this._fillWorkerTotals();
+    this._calcWorkerTotals();
     this._findMaxDuration();
     this._calcBarWidths();
     this._printBars();
   }
 
-  _fillWorkerTotals() {
-    this._sessionStats.forEach((sessionStat, session) => {
-      const totals = this._workerTotals.get(session.workerIndex) || createNewTotals();
-      const sessionDuration = sessionStat.end - sessionStat.start;
-      const envDuration = totals.envDurations.get(session.env) || 0;
-      totals.testsCount += sessionStat.tests;
+  _calcWorkerTotals() {
+    this._result.sessions.forEach((sessionStat, session) => {
+      const {worker, env} = session;
+      const totals = this._workerTotals.get(worker) || createWorkerTotals();
+      const sessionDuration = sessionStat.times.end - sessionStat.times.start;
+      const envDuration = totals.envDurations.get(env) || 0;
+      totals.testsCount += sessionStat.testsCount;
       totals.duration += sessionDuration;
-      totals.envDurations.set(session.env, envDuration + sessionDuration);
-      this._workerTotals.set(session.workerIndex, totals);
+      totals.envDurations.set(env, envDuration + sessionDuration);
+      this._workerTotals.set(worker, totals);
     });
   }
 
@@ -62,12 +62,12 @@ module.exports = class Timeline {
   }
 
   _printBars() {
-    this._workerTotals.forEach((totals, index) => this._printBar(totals, index));
+    this._workerTotals.forEach(this._printBar, this);
   }
 
-  _printBar(totals, index) {
+  _printBar(totals, worker) {
     const {barWidth, duration, testsCount, envBarWidths} = totals;
-    const leftLabel = this._getWorkerLabel(index + 1);
+    const leftLabel = this._getWorkerLabel(worker);
     const bar = this._getBarString(envBarWidths);
     const spacer = ' '.repeat(Math.max(this._maxBarWidth - barWidth + 2, 0));
     const durationStr = duration === this._maxDuration ? chalk.cyan(duration) : duration;
@@ -84,20 +84,21 @@ module.exports = class Timeline {
   _getBarString(envBarWidths) {
     let str = '';
     envBarWidths.forEach((barWidth, env) => {
-      const color = this._envColors.get(env);
+      const envIndex = this._result.executionPerEnv.get(env).index;
+      const color = getEnvColor(envIndex);
       str += chalk[color]('▇'.repeat(barWidth));
     });
     return str;
   }
 
-  _getWorkerLabel(index) {
+  _getWorkerLabel(worker) {
     const maxIndexWidth = String(this._workerTotals.size).length;
-    const indexStr = rightPad(index, maxIndexWidth);
+    const indexStr = rightPad(worker.index + 1, maxIndexWidth);
     return chalk.magenta(`Worker #${indexStr}: `);
   }
 };
 
-function createNewTotals() {
+function createWorkerTotals() {
   return {
     testsCount: 0,
     duration: 0,

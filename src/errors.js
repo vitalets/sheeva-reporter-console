@@ -4,19 +4,26 @@
 
 const chalk = require('chalk');
 
-module.exports = class ErrorPrinter {
-  constructor(index, data) {
-    this._index = index;
-    this._data = data;
-    this._error = data.error;
+module.exports = class ErrorsPrinter {
+  constructor(result) {
+    this._result = result;
+    this._error = null;
+    this._data = null;
+    this._index = 0;
   }
 
   print() {
+    this._result.errors.forEach(this._printError, this);
+  }
+
+  _printError(data, error) {
+    this._error = error;
+    this._data = data;
+    this._printIndex();
+    this._printEnv();
+    this._printFile();
+    this._printSuiteTree();
     if (this._isAssertionError()) {
-      this._printIndex();
-      this._printEnv();
-      this._printFile();
-      this._printSuiteTree();
       this._printErrorMessage();
       this._printOriginalError();
     } else {
@@ -25,6 +32,7 @@ module.exports = class ErrorPrinter {
   }
 
   _printIndex() {
+    this._index++;
     console.log(chalk.bold.red(`ERROR #${this._index}`));
   }
 
@@ -36,17 +44,16 @@ module.exports = class ErrorPrinter {
   _printFile() {
     const {test} = this._data;
     const file = test.parents[0].name;
-    console.log(file);
+    console.log(chalk.gray(file));
   }
 
   _printSuiteTree() {
     const {test} = this._data;
     const suites = test.parents.slice(1);
     const str = []
-      .concat(suites.map(suite => chalk.gray(suite.name)))
+      .concat(suites.map(suite => suite.name))
       .concat([test.name])
-      .map((item, i) => ' '.repeat(i * 2) + item)
-      .join('\n');
+      .join(chalk.green.bold(' > '));
     console.log(str);
   }
 
@@ -59,7 +66,6 @@ module.exports = class ErrorPrinter {
       console.error(this._error.originalError);
     }
   }
-
 
   // todo: more universal way to detect assertion error?
   _isAssertionError() {

@@ -14,10 +14,10 @@ const ErrorPrinter = require('./error');
 const COLORS = ['green', 'yellow', 'blue', 'white'];
 
 module.exports = class Printer {
-  constructor(collector) {
-    this._collector = collector;
+  constructor(result) {
+    this._result = result;
+    this._workers = new Workers(result);
     this._cursor = null;
-    this._workers = new Workers(this._collector);
     this._envColors = new Map();
   }
 
@@ -33,11 +33,11 @@ module.exports = class Printer {
   }
 
   printHeader() {
-    new Header(this._collector.runnerStat).print();
+    new Header(this._result).print();
   }
 
   printEnvs() {
-    this._collector.envStats.forEach((envStat, env) => {
+    this._result.executionPerEnv.forEach((execution, env) => {
       this.printEnvLine({env});
     });
   }

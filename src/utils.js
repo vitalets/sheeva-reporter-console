@@ -4,6 +4,8 @@
 
 const chalk = require('chalk');
 
+const ENV_COLORS = ['green', 'yellow', 'blue', 'white'];
+
 /**
  * Simple pluralize
  *
@@ -46,4 +48,15 @@ exports.num = function(value) {
 exports.numReq = function(value) {
   const color = value === 0 ? 'red' : 'blue';
   return chalk.bold[color](value);
+};
+
+/**
+ * Returns env color
+ *
+ * @param {Number} index
+ * @returns {String}
+ */
+exports.getEnvColor = function(index) {
+  const colorIndex = index % ENV_COLORS.length;
+  return ENV_COLORS[colorIndex];
 };

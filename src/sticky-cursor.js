@@ -2,15 +2,39 @@
  * Sticks to some line in terminal and allows to update all lines below later.
  * Cursor is always sitting on the maxRow.
  *
- * @type {StickyCursor}
+ * #1 xxxxx
+ * #2 yyyyy
+ * #3 _     <--- StickyCursor created, maxRow = 0
+ *
+ * > write(0, 'abc')
+ *
+ * #1 xxxxx
+ * #2 yyyyy
+ * #3 abc
+ * #4 _     <--- maxRow = 1
+ *
+ * > write(1, 'def')
+ *
+ * #1 xxxxx
+ * #2 yyyyy
+ * #3 abc
+ * #4 def
+ * #5 _     <--- maxRow = 2
+ *
+ * > write(0, 'xyz')
+ *
+ * #1 xxxxx
+ * #2 yyyyy
+ * #3 xyz
+ * #4 def
+ * #5 _     <--- maxRow = 2
  */
 
 const ae = require('ansi-escapes');
 
 module.exports = class StickyCursor {
   constructor () {
-    // height of block where we are working now
-    // cursor is always on maxRow
+    // Height of block where we are working now. Cursor is always on maxRow.
     this._maxRow = 0;
   }
 

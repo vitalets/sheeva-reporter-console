@@ -19,16 +19,20 @@ module.exports = class ErrorsPrinter {
   _printError(data, error) {
     this._error = error;
     this._data = data;
-    this._printIndex();
-    this._printEnv();
-    this._printFile();
-    this._printSuiteTree();
+    this._printHeader();
     if (this._isAssertionError()) {
       this._printErrorMessage();
       this._printOriginalError();
     } else {
       console.error(this._error);
     }
+  }
+
+  _printHeader() {
+    this._printIndex();
+    this._printEnv();
+    this._printFile();
+    this._printSuiteTree();
   }
 
   _printIndex() {

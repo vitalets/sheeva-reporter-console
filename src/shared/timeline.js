@@ -105,5 +105,5 @@ function createWorkerTotals() {
     barWidth: 0,
     envDurations: new Map(),
     envBarWidths: new Map(),
-  }
+  };
 }

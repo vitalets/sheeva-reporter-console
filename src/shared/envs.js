@@ -23,16 +23,16 @@ module.exports = class Envs {
     const {index, tests, started, ended} = execution;
     const barColor = getEnvColor(index);
     let line = `${chalk[barColor]('▇')} ${chalk.bold(label)}: `;
-    if (started) {
-      const action = ended ? `done` : `executed`;
-      const counts = `${num(tests.ended)} of ${num(tests.total)} ${pluralize('test', tests.total)}`;
-      const status = tests.failed
-        ? chalk.red(`${tests.failed} FAILED`)
-        : (tests.success ? chalk.green(`SUCCESS`) : '');
-      line += `${action} ${counts} ${status}`;
-    } else {
-      line += chalk.gray(`pending`);
-    }
+    line += started ? this._getStartedEnvInfo(ended, tests) : chalk.gray(`pending`);
     this._cursor.write(index, line);
+  }
+
+  _getStartedEnvInfo(ended, tests) {
+    const action = ended ? `done` : `executed`;
+    const counts = `${num(tests.ended)} of ${num(tests.total)} ${pluralize('test', tests.total)}`;
+    const status = tests.failed
+      ? chalk.red(`${tests.failed} FAILED`)
+      : (tests.success ? chalk.green(`SUCCESS`) : '');
+    return `${action} ${counts} ${status}`;
   }
 };

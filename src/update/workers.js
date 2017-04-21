@@ -14,7 +14,7 @@ module.exports = class RunningWorkers {
     this._maxPrintedWorkerIndex = 0;
   }
 
-  printAll() {
+  printAll() { // eslint-disable-line max-statements
     this._printedRows = 0;
     this._maxPrintedWorkerIndex = 0;
     for (let worker of this._result.workers) {
@@ -28,7 +28,6 @@ module.exports = class RunningWorkers {
         break;
       }
     }
-
     this._cutMaxRow();
   }
 
@@ -70,7 +69,7 @@ module.exports = class RunningWorkers {
     return chalk.magenta(`Worker #${indexStr}: `);
   }
 
-  _getSessionStatus(sessionStat) {
+  _getSessionStatus(sessionStat) { // eslint-disable-line complexity, max-statements
     const {files, times} = sessionStat;
 
     if (!times || !times.start) {

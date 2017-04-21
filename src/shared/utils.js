@@ -13,7 +13,7 @@ const ENV_COLORS = ['green', 'yellow', 'blue', 'white'];
  * @param {Number} count
  * @returns {String}
  */
-exports.pluralize = function(word, count) {
+exports.pluralize = function (word, count) {
   return count === 1 ? word : word + 's';
 };
 
@@ -24,7 +24,7 @@ exports.pluralize = function(word, count) {
  * @param {Number} width
  * @returns {String}
  */
-exports.rightPad = function(value, width) {
+exports.rightPad = function (value, width) {
   value = String(value);
   return value + ' '.repeat(Math.max(width - value.length, 0));
 };
@@ -35,7 +35,7 @@ exports.rightPad = function(value, width) {
  * @param {Number} value
  * @returns {String}
  */
-exports.num = function(value) {
+exports.num = function (value) {
   return chalk.bold.blue(value);
 };
 
@@ -45,7 +45,7 @@ exports.num = function(value) {
  * @param {Number} value
  * @returns {String}
  */
-exports.numReq = function(value) {
+exports.numReq = function (value) {
   const color = value === 0 ? 'red' : 'blue';
   return chalk.bold[color](value);
 };
@@ -56,7 +56,7 @@ exports.numReq = function(value) {
  * @param {Number} index
  * @returns {String}
  */
-exports.getEnvColor = function(index) {
+exports.getEnvColor = function (index) {
   const colorIndex = index % ENV_COLORS.length;
   return ENV_COLORS[colorIndex];
 };

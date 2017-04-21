@@ -33,7 +33,7 @@
 const ae = require('ansi-escapes');
 
 module.exports = class StickyCursor {
-  constructor () {
+  constructor() {
     // Height of block where we are working now. Cursor is always on maxRow.
     this._maxRow = 0;
   }

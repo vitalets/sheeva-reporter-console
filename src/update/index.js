@@ -2,6 +2,8 @@
  * UpdateReporter: uses console cursor to update output
  */
 
+
+
 const Header = require('../shared/header');
 const Footer = require('../shared/footer');
 const Envs = require('../shared/envs');
@@ -11,7 +13,7 @@ const StickyCursor = require('./sticky-cursor');
 const Workers = require('./workers');
 
 module.exports = class UpdateReporter {
-  handleEvent(event, data) {
+  handleEvent(event, data) { // eslint-disable-line complexity
     switch (event) {
       case 'RUNNER_START':
         new Header(data.result).print();

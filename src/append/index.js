@@ -18,7 +18,7 @@ module.exports = class AppendReporter {
     };
   }
 
-  handleEvent(event, data) {
+  handleEvent(event, data) { // eslint-disable-line complexity
     switch (event) {
       case 'RUNNER_START':
         new Header(data.result).print();
@@ -39,7 +39,7 @@ module.exports = class AppendReporter {
         console.log(`${chalk.bold(data.env.label)} ended`);
         break;
 
-      case 'TEST_END':
+      case 'TEST_END': {
         const tests = data.result.runner.tests;
         const percent = 10 * Math.floor(10 * tests.ended / tests.total);
         if (percent !== this._percent) {
@@ -47,6 +47,7 @@ module.exports = class AppendReporter {
           console.log(`${this._percent}%`);
         }
         break;
+      }
     }
   }
 

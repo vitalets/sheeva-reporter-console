@@ -18,7 +18,6 @@ module.exports = class ConsoleReporter {
    */
   constructor(options) {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
-    this._options.append = true;
     this._reporter = this._options.append ? new AppendReporter() : new UpdateReporter();
     this.handleEvent = this._reporter.handleEvent.bind(this._reporter);
   }

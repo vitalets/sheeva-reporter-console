@@ -4,7 +4,7 @@
 
 const path = require('path');
 const chalk = require('chalk');
-const {pluralize, rightPad} = require('./utils');
+const {pluralize, rightPad} = require('../shared/utils');
 
 module.exports = class RunningWorkers {
   constructor(result, cursor) {

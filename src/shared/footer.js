@@ -9,9 +9,9 @@ module.exports = class Footer {
     this._result = result;
   }
 
-  print(startTime) {
-    const errors = this._result.errors;
-    const duration = Date.now() - startTime;
+  print() {
+    const {errors, runner} = this._result;
+    const duration = runner.times.end - runner.times.init;
     console.log('');
     console.log(chalk.underline(`SUMMARY:`));
     console.log(chalk.bold[errors.size ? 'red' : 'green'](`Errors: ${errors.size}`));

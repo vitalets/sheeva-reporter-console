@@ -1,5 +1,4 @@
-# sheeva-reporter-timeline
-Timeline reporter for [Sheeva](1) test runner.
+# sheeva-reporter-console
+Console reporter for [Sheeva] test runner.
 
-
-[1]: https://github.com/vitalets/sheeva
+[Sheeva]: https://github.com/vitalets/sheeva

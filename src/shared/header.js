@@ -11,18 +11,18 @@ module.exports = class Header {
   }
 
   print() {
-    this._printFilesEnvsAndConcurrency();
+    this._printFilesTargetsAndConcurrency();
     this._printOnly();
     this._printSkip();
   }
 
-  _printFilesEnvsAndConcurrency() {
+  _printFilesTargetsAndConcurrency() {
     const {processedFiles, config} = this._result;
     const strFiles = `${numReq(processedFiles.size)} ${pluralize('file', processedFiles.size)}`;
-    const strEnvs = `${numReq(config.envs.length)} ${pluralize('env', config.envs.length)}`;
+    const strTargets = `${numReq(config.targets.length)} ${pluralize('target', config.targets.length)}`;
     const strConcurrency = `concurrency ${num(config.concurrency)}`;
     console.log(`Sheeva started.`);
-    console.log(`Running ${strFiles} on ${strEnvs} with ${strConcurrency}`);
+    console.log(`Running ${strFiles} on ${strTargets} with ${strConcurrency}`);
   }
 
   _printOnly() {

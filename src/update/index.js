@@ -6,7 +6,7 @@
 
 const Header = require('../shared/header');
 const Footer = require('../shared/footer');
-const Envs = require('../shared/envs');
+const Targets = require('../shared/targets');
 const Timeline = require('../shared/timeline');
 const Errors = require('../shared/errors');
 const StickyCursor = require('./sticky-cursor');
@@ -18,22 +18,22 @@ module.exports = class UpdateReporter {
       case 'RUNNER_START':
         new Header(data.result).print();
         this._cursor = new StickyCursor();
-        this._envs = new Envs(data.result, this._cursor);
+        this._targets = new Targets(data.result, this._cursor);
         this._workers = new Workers(data.result, this._cursor);
-        this._envs.printAll();
+        this._targets.printAll();
         break;
 
       case 'RUNNER_END':
         this._unstickCursor();
-        this._envs.printAll();
+        this._targets.printAll();
         new Timeline(data.result).print();
         new Errors(data.result).print();
         new Footer(data.result).print();
         break;
 
-      case 'ENV_START':
-      case 'ENV_END':
-        this._envs.printEnv(data);
+      case 'TARGET_START':
+      case 'TARGET_END':
+        this._targets.printTarget(data);
         break;
 
       case 'WORKER_ADD':
@@ -55,7 +55,7 @@ module.exports = class UpdateReporter {
         break;
 
       case 'TEST_END':
-        this._envs.printEnv(data);
+        this._targets.printTarget(data);
         break;
     }
   }

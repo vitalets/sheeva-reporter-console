@@ -93,11 +93,11 @@ module.exports = class RunningWorkers {
   }
 
   _getRow(worker) {
-    return this._result.executionPerEnv.size + worker.index;
+    return this._result.executionPerTarget.size + worker.index;
   }
 
   _cutMaxRow() {
-    const usedRows = this._result.executionPerEnv.size + this._printedRows;
+    const usedRows = this._result.executionPerTarget.size + this._printedRows;
     this._cursor.cut(usedRows);
   }
 

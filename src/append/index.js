@@ -5,14 +5,14 @@
 const chalk = require('chalk');
 const Header = require('../shared/header');
 const Footer = require('../shared/footer');
-const Envs = require('../shared/envs');
+const Targets = require('../shared/targets');
 const Timeline = require('../shared/timeline');
 const Errors = require('../shared/errors');
 
 module.exports = class AppendReporter {
   constructor() {
     this._percent = 0;
-    // fake cursor for Envs
+    // fake cursor for Targets
     this._cursor = {
       write: (index, line) => console.log(line)
     };
@@ -25,18 +25,18 @@ module.exports = class AppendReporter {
         break;
 
       case 'RUNNER_END':
-        new Envs(data.result, this._cursor).printAll();
+        new Targets(data.result, this._cursor).printAll();
         new Timeline(data.result).print();
         new Errors(data.result).print();
         new Footer(data.result).print();
         break;
 
-      case 'ENV_START':
-        console.log(`${chalk.bold(data.env.label)} started`);
+      case 'TARGET_START':
+        console.log(`${chalk.bold(data.target.label)} started`);
         break;
 
-      case 'ENV_END':
-        console.log(`${chalk.bold(data.env.label)} ended`);
+      case 'TARGET_END':
+        console.log(`${chalk.bold(data.target.label)} ended`);
         break;
 
       case 'TEST_END': {

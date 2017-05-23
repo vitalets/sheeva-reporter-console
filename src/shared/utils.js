@@ -4,7 +4,7 @@
 
 const chalk = require('chalk');
 
-const ENV_COLORS = ['green', 'yellow', 'blue', 'white'];
+const TARGET_COLORS = ['green', 'yellow', 'blue', 'white'];
 
 /**
  * Simple pluralize
@@ -51,12 +51,12 @@ exports.numReq = function (value) {
 };
 
 /**
- * Returns env color
+ * Returns target color
  *
  * @param {Number} index
  * @returns {String}
  */
-exports.getEnvColor = function (index) {
-  const colorIndex = index % ENV_COLORS.length;
-  return ENV_COLORS[colorIndex];
+exports.getTargetColor = function (index) {
+  const colorIndex = index % TARGET_COLORS.length;
+  return TARGET_COLORS[colorIndex];
 };

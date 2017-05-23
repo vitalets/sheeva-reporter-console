@@ -3,7 +3,7 @@
  */
 
 const chalk = require('chalk');
-const {pluralize, rightPad, getEnvColor} = require('./utils');
+const {pluralize, rightPad, getTargetColor} = require('./utils');
 
 const MAX_BAR_WIDTH = 70;
 const LABELS_WIDTH = 50;
@@ -27,17 +27,17 @@ module.exports = class Timeline {
 
   _calcWorkerTotals() {
     this._result.sessions.forEach((sessionStat, session) => {
-      const {worker, env} = session;
+      const {worker, target} = session;
       const totals = this._workerTotals.get(worker) || createWorkerTotals();
       const sessionDuration = sessionStat.times.end - sessionStat.times.start;
       // exclude non-finished sessions (occured while termination)
       if (sessionDuration <= 0) {
         return;
       }
-      const envDuration = totals.envDurations.get(env) || 0;
+      const targetDuration = totals.targetDurations.get(target) || 0;
       totals.testsCount += sessionStat.testsCount;
       totals.duration += sessionDuration;
-      totals.envDurations.set(env, envDuration + sessionDuration);
+      totals.targetDurations.set(target, targetDuration + sessionDuration);
       this._workerTotals.set(worker, totals);
     });
   }
@@ -51,18 +51,18 @@ module.exports = class Timeline {
   }
 
   /**
-   * For last env in each worker calc bar width as difference between totals.barWidth and summarized widths
+   * For last target in each worker calc bar width as difference between totals.barWidth and summarized widths
    * to smooth rounding artefacts
    */
   _calcBarWidths() {
     this._workerTotals.forEach(totals => {
       totals.barWidth = this._calcBarWidth(totals.duration);
       let sumBarWidth = 0;
-      totals.envDurations.forEach((envDuration, env) => {
-        const isLast = totals.envBarWidths.size === totals.envDurations.size - 1;
-        const envBarWidth = isLast ? totals.barWidth - sumBarWidth : this._calcBarWidth(envDuration);
-        totals.envBarWidths.set(env, envBarWidth);
-        sumBarWidth += envBarWidth;
+      totals.targetDurations.forEach((targetDuration, target) => {
+        const isLast = totals.targetBarWidths.size === totals.targetDurations.size - 1;
+        const targetBarWidth = isLast ? totals.barWidth - sumBarWidth : this._calcBarWidth(targetDuration);
+        totals.targetBarWidths.set(target, targetBarWidth);
+        sumBarWidth += targetBarWidth;
       });
     });
   }
@@ -72,9 +72,9 @@ module.exports = class Timeline {
   }
 
   _printBar(totals, worker) {
-    const {barWidth, duration, testsCount, envBarWidths} = totals;
+    const {barWidth, duration, testsCount, targetBarWidths} = totals;
     const leftLabel = this._getWorkerLabel(worker);
-    const bar = this._getBarString(envBarWidths);
+    const bar = this._getBarString(targetBarWidths);
     const spacer = ' '.repeat(Math.max(this._maxBarWidth - barWidth + 2, 0));
     const durationStr = duration === this._maxDuration ? chalk.cyan(duration) : duration;
     const rightLabel = `${durationStr} ms, ${testsCount} ${pluralize('test', testsCount)}`;
@@ -87,11 +87,11 @@ module.exports = class Timeline {
     return Math.round(duration * koef);
   }
 
-  _getBarString(envBarWidths) {
+  _getBarString(targetBarWidths) {
     let str = '';
-    envBarWidths.forEach((barWidth, env) => {
-      const envIndex = this._result.executionPerEnv.get(env).index;
-      const color = getEnvColor(envIndex);
+    targetBarWidths.forEach((barWidth, target) => {
+      const targetIndex = this._result.executionPerTarget.get(target).index;
+      const color = getTargetColor(targetIndex);
       str += chalk[color]('▇'.repeat(barWidth));
     });
     return str;
@@ -109,7 +109,7 @@ function createWorkerTotals() {
     testsCount: 0,
     duration: 0,
     barWidth: 0,
-    envDurations: new Map(),
-    envBarWidths: new Map(),
+    targetDurations: new Map(),
+    targetBarWidths: new Map(),
   };
 }

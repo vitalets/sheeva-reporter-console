@@ -30,7 +30,7 @@ module.exports = class ErrorsPrinter {
 
   _printHeader() {
     this._printIndex();
-    this._printEnv();
+    this._printTarget();
     this._printFile();
     this._printSuiteTree();
   }
@@ -40,9 +40,9 @@ module.exports = class ErrorsPrinter {
     console.log(chalk.bold.red(`ERROR #${this._index}`));
   }
 
-  _printEnv() {
-    const {env} = this._data;
-    console.log(chalk.bold(env.label));
+  _printTarget() {
+    const {target} = this._data;
+    console.log(chalk.bold(target.label));
   }
 
   _printFile() {

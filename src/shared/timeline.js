@@ -30,6 +30,10 @@ module.exports = class Timeline {
       const {worker, env} = session;
       const totals = this._workerTotals.get(worker) || createWorkerTotals();
       const sessionDuration = sessionStat.times.end - sessionStat.times.start;
+      // exclude non-finished sessions (occured while termination)
+      if (sessionDuration <= 0) {
+        return;
+      }
       const envDuration = totals.envDurations.get(env) || 0;
       totals.testsCount += sessionStat.testsCount;
       totals.duration += sessionDuration;

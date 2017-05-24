@@ -17,8 +17,8 @@ module.exports = class Header {
   }
 
   _printFilesTargetsAndConcurrency() {
-    const {processedFiles, config} = this._result;
-    const strFiles = `${numReq(processedFiles.size)} ${pluralize('file', processedFiles.size)}`;
+    const {matchedFiles, config} = this._result;
+    const strFiles = `${numReq(matchedFiles.size)} ${pluralize('file', matchedFiles.size)}`;
     const strTargets = `${numReq(config.targets.length)} ${pluralize('target', config.targets.length)}`;
     const strConcurrency = `concurrency ${num(config.concurrency)}`;
     console.log(`Sheeva started.`);

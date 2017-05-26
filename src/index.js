@@ -5,8 +5,9 @@
 const UpdateReporter = require('./update');
 const AppendReporter = require('./append');
 
+const IS_NODE = typeof process !== 'undefined' && process.release.name === 'node';
 const DEFAULT_OPTIONS = {
-  append: false,
+  append: !IS_NODE,
 };
 
 module.exports = class ConsoleReporter {

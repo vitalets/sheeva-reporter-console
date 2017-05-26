@@ -13,7 +13,7 @@ module.exports = class Timeline {
     this._result = result;
     this._workerTotals = new Map();
     this._maxDuration = 0;
-    this._maxBarWidth = process.stdout.columns
+    this._maxBarWidth = process.stdout && process.stdout.columns
       ? Math.min(MAX_BAR_WIDTH, process.stdout.columns - LABELS_WIDTH)
       : MAX_BAR_WIDTH;
   }

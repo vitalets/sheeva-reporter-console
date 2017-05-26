@@ -62,7 +62,7 @@ module.exports = class ErrorsPrinter {
   }
 
   _printErrorMessage() {
-    console.log(this._error.message);
+    console.error(this._error.message);
   }
 
   _printOriginalError() {

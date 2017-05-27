@@ -2,7 +2,8 @@
  * Prints errors
  */
 
-const chalk = require('chalk');
+const chalk = require('../utils/chalk');
+const log = require('../utils/log');
 
 module.exports = class ErrorsPrinter {
   constructor(result) {
@@ -37,18 +38,18 @@ module.exports = class ErrorsPrinter {
 
   _printIndex() {
     this._index++;
-    console.log(chalk.bold.red(`ERROR #${this._index}`));
+    log(chalk.bold.red(`ERROR #${this._index}`));
   }
 
   _printTarget() {
     const {target} = this._data;
-    console.log(chalk.bold(target.label));
+    log(chalk.bold(target.label));
   }
 
   _printFile() {
     const {test} = this._data;
     const file = test.parents[0].name;
-    console.log(chalk.gray(file));
+    log(chalk.gray(file));
   }
 
   _printSuiteTree() {
@@ -58,7 +59,7 @@ module.exports = class ErrorsPrinter {
       .concat(suites.map(suite => suite.name))
       .concat([test.name])
       .join(chalk.green.bold(' > '));
-    console.log(str);
+    log(str);
   }
 
   _printErrorMessage() {

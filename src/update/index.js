@@ -2,8 +2,6 @@
  * UpdateReporter: uses console cursor to update output
  */
 
-
-
 const Header = require('../shared/header');
 const Footer = require('../shared/footer');
 const Targets = require('../shared/targets');

@@ -2,8 +2,9 @@
  * Prints timeline bars
  */
 
-const chalk = require('chalk');
-const {pluralize, rightPad, getTargetColor} = require('./utils');
+const chalk = require('../utils/chalk');
+const log = require('../utils/log');
+const {pluralize, rightPad, getTargetColor} = require('../utils');
 
 const MAX_BAR_WIDTH = 70;
 const LABELS_WIDTH = 50;
@@ -79,7 +80,7 @@ module.exports = class Timeline {
     const durationStr = duration === this._maxDuration ? chalk.cyan(duration) : duration;
     const rightLabel = `${durationStr} ms, ${testsCount} ${pluralize('test', testsCount)}`;
     const line = `${leftLabel}${bar}${spacer}${rightLabel}`;
-    console.log(line);
+    log(line);
   }
 
   _calcBarWidth(duration) {

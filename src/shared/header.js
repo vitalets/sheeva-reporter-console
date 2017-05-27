@@ -2,8 +2,9 @@
  * Prints header
  */
 
-const chalk = require('chalk');
-const {pluralize, num, numReq} = require('./utils');
+const chalk = require('../utils/chalk');
+const log = require('../utils/log');
+const {pluralize, num, numReq} = require('../utils');
 
 module.exports = class Header {
   constructor(result) {
@@ -21,15 +22,15 @@ module.exports = class Header {
     const strFiles = `${numReq(matchedFiles.size)} ${pluralize('file', matchedFiles.size)}`;
     const strTargets = `${numReq(config.targets.length)} ${pluralize('target', config.targets.length)}`;
     const strConcurrency = `concurrency ${num(config.concurrency)}`;
-    console.log(`Sheeva started.`);
-    console.log(`Running ${strFiles} on ${strTargets} with ${strConcurrency}`);
+    log(`Sheeva started.`);
+    log(`Running ${strFiles} on ${strTargets} with ${strConcurrency}`);
   }
 
   _printOnly() {
     const files = this._result.only.files.toArray();
     if (files.length) {
       const filesStr = `${num(files.length)} (${chalk.gray(files.join(', '))})`;
-      console.log(`Files with ${chalk.bold.yellow('ONLY')}: ${filesStr}`);
+      log(`Files with ${chalk.bold.yellow('ONLY')}: ${filesStr}`);
     }
   }
 
@@ -37,7 +38,7 @@ module.exports = class Header {
     const files = this._result.skip.files.toArray();
     if (files.length) {
       const filesStr = `${num(files.length)} (${chalk.gray(files.join(', '))})`;
-      console.log(`Files with ${chalk.bold.yellow('SKIP')}: ${filesStr}`);
+      log(`Files with ${chalk.bold.yellow('SKIP')}: ${filesStr}`);
     }
   }
 };

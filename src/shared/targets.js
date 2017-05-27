@@ -2,8 +2,8 @@
  * Prints progress for each target
  */
 
-const chalk = require('chalk');
-const {pluralize, num, getTargetColor} = require('./utils');
+const chalk = require('../utils/chalk');
+const {pluralize, num, getTargetColor} = require('../utils');
 
 module.exports = class Targets {
   constructor(result, cursor) {

@@ -31,6 +31,7 @@
  */
 
 const ae = require('ansi-escapes');
+const log = require('../utils/log');
 
 module.exports = class StickyCursor {
   constructor() {
@@ -68,7 +69,7 @@ module.exports = class StickyCursor {
 
   _writeDown(row, str) {
     for (let i = this._maxRow; i < row + 1; i++) {
-      console.log(i === row ? str : '');
+      log(i === row ? str : '');
       this._maxRow++;
     }
   }

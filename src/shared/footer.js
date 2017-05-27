@@ -2,7 +2,8 @@
  * Prints footer
  */
 
-const chalk = require('chalk');
+const chalk = require('../utils/chalk');
+const log = require('../utils/log');
 
 module.exports = class Footer {
   constructor(result) {
@@ -12,10 +13,10 @@ module.exports = class Footer {
   print() {
     const {errors, runner} = this._result;
     const duration = runner.times.end - runner.times.init;
-    console.log('');
-    console.log(chalk.underline(`SUMMARY:`));
-    console.log(chalk.bold[errors.size ? 'red' : 'green'](`Errors: ${errors.size}`));
-    console.log(`Total time: ${chalk.cyan(duration)} ms`);
-    console.log(`Done.`);
+    log('');
+    log(chalk.underline(`SUMMARY:`));
+    log(chalk.bold[errors.size ? 'red' : 'green'](`Errors: ${errors.size}`));
+    log(`Total time: ${chalk.cyan(duration)} ms`);
+    log(`Done.`);
   }
 };

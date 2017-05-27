@@ -2,7 +2,7 @@
  * Utils
  */
 
-const chalk = require('chalk');
+const chalk = require('./chalk');
 
 const TARGET_COLORS = ['green', 'yellow', 'blue', 'white'];
 

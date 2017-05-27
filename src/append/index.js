@@ -2,7 +2,8 @@
  * Append reporter suitable for CI console.
  */
 
-const chalk = require('chalk');
+const chalk = require('../utils/chalk');
+const log = require('../utils/log');
 const Header = require('../shared/header');
 const Footer = require('../shared/footer');
 const Targets = require('../shared/targets');
@@ -14,7 +15,7 @@ module.exports = class AppendReporter {
     this._percent = 0;
     // fake cursor for Targets
     this._cursor = {
-      write: (index, line) => console.log(line)
+      write: (index, line) => log(line)
     };
   }
 
@@ -32,11 +33,11 @@ module.exports = class AppendReporter {
         break;
 
       case 'TARGET_START':
-        console.log(`${chalk.bold(data.target.label)} started`);
+        log(`${chalk.bold(data.target.label)} started`);
         break;
 
       case 'TARGET_END':
-        console.log(`${chalk.bold(data.target.label)} ended`);
+        log(`${chalk.bold(data.target.label)} ended`);
         break;
 
       case 'TEST_END': {
@@ -44,7 +45,7 @@ module.exports = class AppendReporter {
         const percent = 10 * Math.floor(10 * tests.ended / tests.total);
         if (percent !== this._percent) {
           this._percent = percent;
-          console.log(`${this._percent}%`);
+          log(`${this._percent}%`);
         }
         break;
       }

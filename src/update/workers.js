@@ -3,8 +3,8 @@
  */
 
 const path = require('path');
-const chalk = require('chalk');
-const {pluralize, rightPad} = require('../shared/utils');
+const chalk = require('../utils/chalk');
+const {pluralize, rightPad} = require('../utils');
 
 module.exports = class RunningWorkers {
   constructor(result, cursor) {

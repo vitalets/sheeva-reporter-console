@@ -31,7 +31,6 @@ module.exports = class ErrorsPrinter {
 
   _printHeader() {
     this._printIndex();
-    this._printTarget();
     this._printFile();
     this._printSuiteTree();
   }
@@ -41,15 +40,10 @@ module.exports = class ErrorsPrinter {
     log(chalk.bold.red(`ERROR #${this._index}`));
   }
 
-  _printTarget() {
-    const {target} = this._data;
-    log(chalk.bold(target.label));
-  }
-
   _printFile() {
-    const {test} = this._data;
+    const {target, test} = this._data;
     const file = test.parents[0].name;
-    log(chalk.gray(file));
+    log(`${target.label}: ${chalk.gray(file)}`);
   }
 
   _printSuiteTree() {
@@ -58,6 +52,7 @@ module.exports = class ErrorsPrinter {
     const str = []
       .concat(suites.map(suite => suite.name))
       .concat([test.name])
+      .map(item => chalk.bold(item))
       .join(chalk.green.bold(' > '));
     log(str);
   }

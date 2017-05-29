@@ -16,7 +16,7 @@ module.exports = class Footer {
     log('');
     log(chalk.underline(`SUMMARY:`));
     log(chalk.bold[errors.size ? 'red' : 'green'](`Errors: ${errors.size}`));
-    log(`Total time: ${chalk.cyan(duration)} ms`);
+    log(`Total time: ${chalk.cyan.bold(duration)} ms`);
     log(`Done.`);
   }
 };

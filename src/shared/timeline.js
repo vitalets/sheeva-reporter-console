@@ -77,7 +77,7 @@ module.exports = class Timeline {
     const leftLabel = this._getWorkerLabel(worker);
     const bar = this._getBarString(targetBarWidths);
     const spacer = ' '.repeat(Math.max(this._maxBarWidth - barWidth + 2, 0));
-    const durationStr = duration === this._maxDuration ? chalk.cyan(duration) : duration;
+    const durationStr = duration === this._maxDuration ? chalk.cyan.bold(duration) : duration;
     const rightLabel = `${durationStr} ms, ${testsCount} ${pluralize('test', testsCount)}`;
     const line = `${leftLabel}${bar}${spacer}${rightLabel}`;
     log(line);

@@ -2,12 +2,12 @@
  * Console reporter
  */
 
+const isNode = require('detect-node');
 const UpdateReporter = require('./update');
 const AppendReporter = require('./append');
 
-const IS_NODE = typeof process !== 'undefined' && process.release.name === 'node';
 const DEFAULT_OPTIONS = {
-  append: !IS_NODE,
+  append: !isNode,
 };
 
 module.exports = class ConsoleReporter {

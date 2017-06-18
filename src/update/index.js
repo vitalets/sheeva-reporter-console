@@ -13,20 +13,20 @@ const Workers = require('./workers');
 module.exports = class UpdateReporter {
   handleEvent(event, data) { // eslint-disable-line complexity
     switch (event) {
-      case 'RUNNER_START':
-        new Header(data.result).print();
+      case 'RUNNER_STARTED':
+        new Header(data.state).print();
         this._cursor = new StickyCursor();
-        this._targets = new Targets(data.result, this._cursor);
-        this._workers = new Workers(data.result, this._cursor);
+        this._targets = new Targets(data.state, this._cursor);
+        this._workers = new Workers(data.state, this._cursor);
         this._targets.printAll();
         break;
 
       case 'RUNNER_END':
         this._unstickCursor();
         this._targets.printAll();
-        new Timeline(data.result).print();
-        new Errors(data.result).print();
-        new Footer(data.result).print();
+        new Timeline(data.state).print();
+        new Errors(data.state).print();
+        new Footer(data.state).print();
         break;
 
       case 'TARGET_START':

@@ -6,15 +6,15 @@ const chalk = require('../utils/chalk');
 const log = require('../utils/log');
 
 module.exports = class ErrorsPrinter {
-  constructor(result) {
-    this._result = result;
+  constructor(state) {
+    this._state = state;
     this._error = null;
     this._data = null;
     this._index = 0;
   }
 
   print() {
-    this._result.errors.forEach(this._printError, this);
+    this._state.errors.forEach(this._printError, this);
   }
 
   _printError(data, error) {

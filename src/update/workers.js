@@ -7,8 +7,8 @@ const chalk = require('../utils/chalk');
 const {pluralize, rightPad} = require('../utils');
 
 module.exports = class RunningWorkers {
-  constructor(result, cursor) {
-    this._result = result;
+  constructor(state, cursor) {
+    this._state = state;
     this._cursor = cursor;
     this._printedRows = 0;
     this._maxPrintedWorkerIndex = 0;
@@ -17,7 +17,7 @@ module.exports = class RunningWorkers {
   printAll() { // eslint-disable-line max-statements
     this._printedRows = 0;
     this._maxPrintedWorkerIndex = 0;
-    for (let worker of this._result.workers) {
+    for (let worker of this._state.workers) {
       const row = this._getRow(worker);
       if (row < this._cursor.lastScreenRow) {
         this._printRow(row, worker);
@@ -41,14 +41,14 @@ module.exports = class RunningWorkers {
 
   _printRow(row, worker) {
     const label = this._getWorkerLabel(worker.index + 1);
-    const sessionStat = this._result.sessions.get(worker.session);
+    const sessionStat = this._state.sessions.get(worker.session);
     const status = sessionStat ? this._getSessionStatus(sessionStat) : chalk.gray('free');
     this._updateMaxPrintedWorkerIndex(worker.index);
     this._cursor.write(row, `${label}${status}`);
   }
 
   _printLastRow(row, worker) {
-    const invisibleWorkersCount = this._result.workers.size - this._printedRows;
+    const invisibleWorkersCount = this._state.workers.size - this._printedRows;
     if (invisibleWorkersCount > 1) {
       this._printOutOfScreenSummary(invisibleWorkersCount);
     } else {
@@ -63,7 +63,7 @@ module.exports = class RunningWorkers {
   }
 
   _getWorkerLabel(index) {
-    const concurrency = this._result.config.concurrency;
+    const concurrency = this._state.config.concurrency;
     const maxIndexWidth = String(concurrency).length;
     const indexStr = rightPad(index, maxIndexWidth);
     return chalk.magenta(`Worker #${indexStr}: `);
@@ -93,11 +93,11 @@ module.exports = class RunningWorkers {
   }
 
   _getRow(worker) {
-    return this._result.executionPerTarget.size + worker.index;
+    return this._state.executionPerTarget.size + worker.index;
   }
 
   _cutMaxRow() {
-    const usedRows = this._result.executionPerTarget.size + this._printedRows;
+    const usedRows = this._state.executionPerTarget.size + this._printedRows;
     this._cursor.cut(usedRows);
   }
 

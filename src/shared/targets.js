@@ -6,20 +6,20 @@ const chalk = require('../utils/chalk');
 const {pluralize, num, getTargetColor} = require('../utils');
 
 module.exports = class Targets {
-  constructor(result, cursor) {
-    this._result = result;
+  constructor(state, cursor) {
+    this._state = state;
     this._cursor = cursor;
   }
 
   printAll() {
-    this._result.executionPerTarget.forEach((execution, target) => {
+    this._state.executionPerTarget.forEach((execution, target) => {
       this.printTarget({target, execution});
     });
   }
 
   printTarget(data) {
     const label = data.target.label;
-    const execution = data.execution || this._result.executionPerTarget.get(data.target);
+    const execution = data.execution || this._state.executionPerTarget.get(data.target);
     const {index, tests, started, ended} = execution;
     const barColor = getTargetColor(index);
     let line = `${chalk[barColor]('▇')} ${chalk.bold(label)}: `;

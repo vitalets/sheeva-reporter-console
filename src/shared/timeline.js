@@ -10,8 +10,8 @@ const MAX_BAR_WIDTH = 70;
 const LABELS_WIDTH = 50;
 
 module.exports = class Timeline {
-  constructor(result) {
-    this._result = result;
+  constructor(state) {
+    this._state = state;
     this._workerTotals = new Map();
     this._maxDuration = 0;
     this._maxBarWidth = process.stdout && process.stdout.columns
@@ -27,7 +27,7 @@ module.exports = class Timeline {
   }
 
   _calcWorkerTotals() {
-    this._result.sessions.forEach((sessionStat, session) => {
+    this._state.sessions.forEach((sessionStat, session) => {
       const {worker, target} = session;
       const totals = this._workerTotals.get(worker) || createWorkerTotals();
       const sessionDuration = sessionStat.times.end - sessionStat.times.start;
@@ -91,7 +91,7 @@ module.exports = class Timeline {
   _getBarString(targetBarWidths) {
     let str = '';
     targetBarWidths.forEach((barWidth, target) => {
-      const targetIndex = this._result.executionPerTarget.get(target).index;
+      const targetIndex = this._state.executionPerTarget.get(target).index;
       const color = getTargetColor(targetIndex);
       str += chalk[color]('▇'.repeat(barWidth));
     });

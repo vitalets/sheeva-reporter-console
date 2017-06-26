@@ -42,15 +42,14 @@ module.exports = class ErrorsPrinter {
 
   _printFile() {
     const {target, test} = this._data;
-    const file = test.parents[0].name;
+    const file = test.parentNames[0];
     log(`${target.label}: ${chalk.gray(file)}`);
   }
 
   _printSuiteTree() {
     const {test} = this._data;
-    const suites = test.parents.slice(1);
-    const str = []
-      .concat(suites.map(suite => suite.name))
+    const suites = test.parentNames.slice(1);
+    const str = suites
       .concat([test.name])
       .map(item => chalk.bold(item))
       .join(chalk.green.bold(' > '));
